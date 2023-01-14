@@ -4,9 +4,6 @@ output: html_document
 author: Yihan Xiao
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 # **TEDDY**
 # **T**ransposable **e**lement **d**e novo insertion **detecting** and chimeric transcripts identif**y**ing
