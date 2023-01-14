@@ -8,6 +8,10 @@ author: Yihan Xiao
 # **TEDDY**
 # **T**ransposable **e**lement **d**e novo insertion **detecting** and chimeric transcripts identif**y**ing
 **TEDDY** is a framework for TE insertion detection and chimeric transcripts identification.
+<p align="center">
+<img src="./images/workflow.png"/>
+</p>
+
 
 ## 1.Getting Started
 **1.1 Installation**
@@ -77,7 +81,7 @@ chi_test <- ChimericDrivenTest(SEobject = se, condition = condition)
 results <- extractTest(object = chi_test)
 ```
 
-3.6.2 Estimate relative fold changes of counts in the TE-chimeric exon among different conditions and versus other exons, calculated by a GLM fit based on the formula count ~ condition + TE-chimeric + condition:TE-chimeric. The interaction coefficient reflects that the fraction of the gene’s reads of TE-chimeric exon differs significantly between the different experimental conditions. That is, TE-chimeric transcripts may play a role under different biological conditions. 
+3.6.2 Estimate relative fold changes of counts in the TE-chimeric exon among different conditions and versus other exons, calculated by a GLM fit based on the formula count ~ condition + TE-chimeric + condition:TE-chimeric. The interaction coefficient reflects that the fraction of the gene's reads of TE-chimeric exon differs significantly between the different experimental conditions. That is, TE-chimeric transcripts may play a role under different biological conditions. 
 ```{r foldchange, warning=FALSE, eval=FALSE, message=FALSE}
 calculateFoldchange(object = chi_test, genes = genes, crossVar="condition")
 ```
