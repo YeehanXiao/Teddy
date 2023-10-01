@@ -14,9 +14,16 @@ author: Yihan Xiao
 
 
 ## 1.Getting Started
-**1.1 Installation**
-```{shell install, warning=FALSE, eval=FALSE,message=FALSE}
+**1.2 Preparation**
+To compile C code, use the following steps:
+```{shell prepare, warning=FALSE, eval=FALSE,message=FALSE}
 cd Teddy
+cd Rstringtie/src
+make
+```
+**1.2 Installation**compile C code
+```{shell install, warning=FALSE, eval=FALSE,message=FALSE}
+cd ../..
 R CMD INSTALL TEi
 R CMD INSTALL Rstringtie
 ```
