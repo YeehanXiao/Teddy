@@ -21,7 +21,7 @@ cd Teddy
 cd Rstringtie/src
 make
 ```
-**1.2 Installation**compile C code
+**1.2 Installation**
 ```{shell install, warning=FALSE, eval=FALSE,message=FALSE}
 cd ../..
 R CMD INSTALL TEi
