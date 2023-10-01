@@ -73,15 +73,23 @@ anno <- Rstringtie::prepareAnno(gtfFile = N_reference, transposon = repeats)
 se <- countAnno(annotation = anno, bamfiles = bamfiles)
 ```
 
-**3.6 Detect to what extent TE-chimeric exon affect the expression of the corresponding transcript**
+**3.6  Count the reads falling into the transcripts among bam files**
+```{r count2, warning=FALSE, eval=FALSE, message=FALSE}
+combineSE <- stringtieCombine(reference = N_reference, 
+                              bamfile = bamfiles,
+                              params = "-p 70", 
+                              gtfFiles = gtfFiles)
+```
 
-3.6.1 Fit the counts with the formula ~sample + TE-chimeric + condition:TE-chimeric and compare it to the null model ~ sample + TE-chimeric. TE-chimeric is a factor with two levels, which classified the exon as TE-chimeric exon or other exon. Compare the deviances of two GLM fits for each counting bin through χ2-distribution test and extract the result from the test .
+**3.7 Detect to what extent TE-chimeric exon affect the expression of the corresponding transcript**
+
+3.7.1 Fit the counts with the formula ~sample + TE-chimeric + condition:TE-chimeric and compare it to the null model ~ sample + TE-chimeric. TE-chimeric is a factor with two levels, which classified the exon as TE-chimeric exon or other exon. Compare the deviances of two GLM fits for each counting bin through χ2-distribution test and extract the result from the test .
 ```{r test, warning=FALSE, eval=FALSE, message=FALSE}
 chi_test <- ChimericDrivenTest(SEobject = se, condition = condition)
 results <- extractTest(object = chi_test)
 ```
 
-3.6.2 Estimate relative fold changes of counts in the TE-chimeric exon among different conditions and versus other exons, calculated by a GLM fit based on the formula count ~ condition + TE-chimeric + condition:TE-chimeric. The interaction coefficient reflects that the fraction of the gene's reads of TE-chimeric exon differs significantly between the different experimental conditions. That is, TE-chimeric transcripts may play a role under different biological conditions. 
+3.7.2 Estimate relative fold changes of counts in the TE-chimeric exon among different conditions and versus other exons, calculated by a GLM fit based on the formula count ~ condition + TE-chimeric + condition:TE-chimeric. The interaction coefficient reflects that the fraction of the gene's reads of TE-chimeric exon differs significantly between the different experimental conditions. That is, TE-chimeric transcripts may play a role under different biological conditions. 
 ```{r foldchange, warning=FALSE, eval=FALSE, message=FALSE}
 calculateFoldchange(object = chi_test, genes = genes, crossVar="condition")
 ```
