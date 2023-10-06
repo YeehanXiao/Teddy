@@ -6,7 +6,7 @@
 #' 
 #' Extract soft clip reads from alignment.
 #' 
-#' @param file Character, the alignment file. Support BAM and SAM.
+#' @param file Character, the alignment file. Supports BAM and SAM.
 #' @param outfq Character, the output FASTQ file.
 #' @param mapq The MAPping quality, 10 by default.
 #' @param length The minimum soft clip reads length, 30 by default.
