@@ -72,7 +72,7 @@ Rstringtie::gffcompareAnno(reference = reference, gtfFile = N_reference, outfile
 
 **3.4 Flatten the transcripts into counting bins and annotate them via the annotated TE reference**
 ```{r repeats, warning=FALSE, eval=FALSE, message=FALSE}
-anno <- Rstringtie::prepareAnno(gtfFile = N_reference, transposon = transposon)
+anno <- Rstringtie::prepareAnno(gtffile = N_reference, transposon = transposon)
 ```
 
 **3.5 Count the reads falling into the counting bins among bam files**
