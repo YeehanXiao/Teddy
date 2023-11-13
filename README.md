@@ -70,14 +70,14 @@ Rstringtie::stringtieMerge(reference = reference, gtfFiles = gtfFiles, outfile =
 Rstringtie::gffcompareAnno(reference = reference, gtfFile = N_reference, outfile = annoGTF)
 ```
 
-**3.4 Flatten the transcripts into counting bins and annotate them via the annotated TE reference**
+**3.4 Flatten the transcripts into counting bins and annotate them via the annotated TE reference as a GRanges obejct**
 ```{r repeats, warning=FALSE, eval=FALSE, message=FALSE}
 anno <- Rstringtie::prepareAnno(gtffile = N_reference, transposon = transposon)
 ```
 
 **3.5 Count the reads falling into the counting bins among bam files**
 ```{r count, warning=FALSE, eval=FALSE, message=FALSE}
-se <- countAnno(annotation = anno, bamfiles = bamfiles)
+se <- countAnno(annotation = anno, bamfiles = bamfile)
 ```
 
 **3.6  Count the reads falling into the transcripts among bam files**
