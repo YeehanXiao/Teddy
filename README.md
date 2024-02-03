@@ -100,3 +100,18 @@ results <- extractTest(object = chi_test)
 ```{r foldchange, warning=FALSE, eval=FALSE, message=FALSE}
 calculateFoldchange(object = chi_test, genes = genes, crossVar="condition")
 ```
+
+**3.8 Visualize Form and Expression Fluctuation of TE-chimeric Transcripts**
+
+3.8.1 To investigate the structural form and expression changes of TE-chimeric transcripts, TEDDY includes the formPlot function. This tool is designed to visualize how transposable elements (TEs) integrate within specific transcripts
+```{r vis1, warning=FALSE, eval=FALSE, message=FALSE}
+formPlot(GTF = GTF, txid = txid, rank = 1,geneName = geneName,TEname = TEname)
+```
+3.8.2 Plotting Gene Body and Specific Isoform Structure and Expression
+To visualize the structure of a gene body and the expression of a specific isoform, particularly showcasing the results of the previously mentioned `ChimericDrivenTest`, the `diffBinPlot` function is developed. This function generates a plot that highlights the gene body and isoform structure against the backdrop of expression levels, effectively visualizing the impact of TE-chimeric events on the expression.
+```{r vis2, warning=FALSE, eval=FALSE, message=FALSE}
+diffBinPlot(count = count, conditions = condition, annotation = anno,
+            idx = geneIndex, 
+            gtf = N_reference,
+            txid = txid,
+            chi_test = chi_test)
