@@ -118,6 +118,7 @@ diffBinPlot(count = count, conditions = condition, annotation = anno,
 ```
 
 **3.9 Search the motif binding sites of TE-chimeric transcripts**
+
 TEDDY enables the identification of motif binding sites within TE-chimeric transcripts, leveraging the `pcmFunction` to convert motifs of interest from probability matrix (PCM) to position weight matrix (PWM) format. This PWM can then be used as an input for motif search. By applying various thresholds for filtering and integrating other epigenetic data, users can construct potential motif networks that offer insights into the regulatory mechanisms of TE-chimeric transcripts.
 
 To perform motif search on TE-chimeric transcripts, the `MotifSearch` function can be utilized as follows:
