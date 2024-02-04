@@ -103,7 +103,7 @@ calculateFoldchange(object = chi_test, genes = genes, crossVar="condition")
 
 **3.8 Visualize Form and Expression Fluctuation of TE-chimeric Transcripts**
 
-3.8.1 To investigate the structural form and expression changes of TE-chimeric transcripts, TEDDY includes the formPlot function. This tool is designed to visualize how transposable elements (TEs) integrate within specific transcripts
+3.8.1 To investigate the structural form and expression changes of TE-chimeric transcripts, TEDDY includes the formPlot function. This tool is designed to visualize how transposable elements (TEs) integrate within specific transcripts.
 ```{r vis1, warning=FALSE, eval=FALSE, message=FALSE}
 formPlot(GTF = GTF, txid = txid, rank = 1,geneName = geneName,TEname = TEname)
 ```
