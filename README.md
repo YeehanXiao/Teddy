@@ -18,7 +18,7 @@ author: Yihan Xiao
 To compile C code, use the following steps:
 ```{shell prepare, warning=FALSE, eval=FALSE,message=FALSE}
 cd Teddy
-cd Rstringtie/src
+cd Teddy/src
 make
 ```
 **1.2 Installation**
