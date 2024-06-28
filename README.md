@@ -25,12 +25,12 @@ make
 ```{shell install, warning=FALSE, eval=FALSE,message=FALSE}
 cd ../..
 R CMD INSTALL TEi
-R CMD INSTALL Rstringtie
+R CMD INSTALL Teddy
 ```
 **1.2 Initialization**
 ```{r init, warning=FALSE, eval=FALSE,message=FALSE}
 library(TEi)
-library(Rstringtie)
+library(Teddy)
 ```
 
 ## 2. Detect de novo TE insertion sites
@@ -57,27 +57,27 @@ TEi::processInsertion(file = outBed)
 ## 3. Identify chimeric transcripts
 **3.1 Assemble reads into transcripts by Stringtie**
 ```{r assemble, warning=FALSE, eval=FALSE, message=FALSE}
-Rstringtie::stringtieAssembly(bam = bam, reference = reference, outfile = outfile)
+Teddy::stringtieAssembly(bam = bam, reference = reference, outfile = outfile)
 ```
 
 **3.2 Merge various GTF files among different samples for a unified newly assembled reference**
 ```{r merge, warning=FALSE, eval=FALSE, message=FALSE}
-Rstringtie::stringtieMerge(reference = reference, gtfFiles = gtfFiles, outfile = N_reference)
+Teddy::stringtieMerge(reference = reference, gtfFiles = gtfFiles, outfile = N_reference)
 ```
 
 **3.3 Annotate the newly assembled reference via the genome reference**
 ```{r anno, warning=FALSE, eval=FALSE, message=FALSE}
-Rstringtie::gffcompareAnno(reference = reference, gtfFile = N_reference, outfile = annoGTF)
+Teddy::gffcompareAnno(reference = reference, gtfFile = N_reference, outfile = annoGTF)
 ```
 
 **3.4 Flatten the transcripts into counting bins and annotate them via the annotated TE reference as a GRanges obejct**
 ```{r repeats, warning=FALSE, eval=FALSE, message=FALSE}
-anno <- Rstringtie::prepareAnno(gtffile = N_reference, transposon = transposon)
+anno <- Teddy::prepareAnno(gtffile = N_reference, transposon = transposon)
 ```
 
 **3.5 Count the reads falling into the counting bins among bam files**
 ```{r count, warning=FALSE, eval=FALSE, message=FALSE}
-se <- countAnno(annotation = anno, bamfiles = bamfile)
+se <- countAnno(annotation = anno, bamfiles = bamfile, nthreads = 5)
 ```
 
 **3.6  Count the reads falling into the transcripts among bam files**
