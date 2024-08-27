@@ -26,9 +26,8 @@ make
 cd ../..
 R CMD INSTALL Teddy
 ```
-## 2. Initialization**
+## 2. Initialization
 ```{r init, warning=FALSE, eval=FALSE,message=FALSE}
-library(TEi)
 library(Teddy)
 ```
 
