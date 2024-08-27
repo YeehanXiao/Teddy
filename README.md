@@ -14,7 +14,7 @@ author: Yihan Xiao
 
 
 ## 1.Getting Started
-**1.2 Preparation**
+**1.1 Preparation**
 To compile C code, use the following steps:
 ```{shell prepare, warning=FALSE, eval=FALSE,message=FALSE}
 cd Teddy
@@ -24,34 +24,12 @@ make
 **1.2 Installation**
 ```{shell install, warning=FALSE, eval=FALSE,message=FALSE}
 cd ../..
-R CMD INSTALL TEi
 R CMD INSTALL Teddy
 ```
-**1.2 Initialization**
+## 2. Initialization**
 ```{r init, warning=FALSE, eval=FALSE,message=FALSE}
 library(TEi)
 library(Teddy)
-```
-
-## 2. Detect de novo TE insertion sites
-**2.1 Extract soft clip reads**
-```{r extract, warning=FALSE, eval=FALSE, message=FALSE}
-extractSoftClip(file = input, outfq = output)
-```
-
-**2.2 Align soft clip reads**
-```{r align, warning=FALSE, eval=FALSE, message=FALSE}
-alignment(reference = reference, fastq  = input, bamOutput = output, threads = threads)
-```
-
-**2.3 Identify the TE insertions**
-```{r TEi, warning=FALSE, eval=FALSE, message=FALSE}
-insertLocation(file = bamfile, outBed = outBed)
-```
-
-**2.4 Merge and filter the TE insertions**
-```{r process, warning=FALSE, eval=FALSE, message=FALSE}
-TEi::processInsertion(file = outBed)
 ```
 
 ## 3. Identify chimeric transcripts
