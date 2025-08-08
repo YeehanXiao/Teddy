@@ -15,12 +15,13 @@ author: Yihan Xiao
 
 ## 1.Getting Started
 **1.1 Preparation**
-To compile C code, use the following steps:
-```{shell prepare, warning=FALSE, eval=FALSE,message=FALSE}
+To compile Teddy and all dependencies:
+```{shell prepare2, warning=FALSE, eval=FALSE,message=FALSE}
 cd Teddy
-cd Teddy/src
-make
+cd src && make -j
 ```
+All required libraries (libdeflate, xz, bzip2) are included under `src/deps`, and will be compiled automatically.
+
 **1.2 Installation**
 ```{shell install, warning=FALSE, eval=FALSE,message=FALSE}
 cd ../..
