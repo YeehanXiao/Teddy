@@ -27,6 +27,15 @@ All required libraries (libdeflate, xz, bzip2) are included under `src/deps`, an
 cd ../..
 R CMD INSTALL Teddy
 ```
+Note
+
+If you encounter build errors during compilation, especially after switching machines or modifying source files, consider cleaning previously compiled artifacts before rebuilding:
+
+```bash
+make clean
+make -j
+```
+
 ## 2. Initialization
 ```{r init, warning=FALSE, eval=FALSE,message=FALSE}
 library(Teddy)
