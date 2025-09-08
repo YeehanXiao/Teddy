@@ -119,7 +119,6 @@ MotifSearch(object = object, te = te, pwm = pwm, filter = filter, min.score = mi
 
 
 
-## Teddy outputs at a glance
 
 | Level | Steps / Functions |     Key Inputs    | Key Outputs | Object | Primary use | Notes |
 |-----------------|-------------------|------------------|---------------------|------------------|----------------------|---------------|
