@@ -121,7 +121,7 @@ MotifSearch(object = object, te = te, pwm = pwm, filter = filter, min.score = mi
 
 ## Teddy outputs at a glance
 
-| Level | Steps / Functions | Key Inputs | Key Outputs | Object | Primary use | Notes |
+| Level | Steps / Functions |     Key Inputs    | Key Outputs | Object | Primary use | Notes |
 |-----------------|-------------------|------------------|---------------------|------------------|----------------------|---------------|
 | **A. <br>Reference & Annotation** | `stringtieMerge()`<br><br><br>`gffcompareAnno()`<br><br><br>`prepareAnno()` | Per-sample StringTie GTF; optional reference<br>Reference GTF + merged GTF<br>Annotated GTF + TE annotation (GRanges) | Unified transcript reference<br><br><br>Annotated transcript reference<br><br><br>Flattened exon bins with TE labels | Merged GTF<br><br><br><br>Annotated merged GTF<br><br><br>GRanges object | Provide unified reference<br>Label known vs novel isoforms<br>Enable exon-level counting with TE | Ensure consistent chromosome naming<br>Preserve `transcript_id` / `gene_id`<br>Match `seqlevelsStyle` with BAM & TE |
 | **B. <br>Exon-level counts** | `countAnno()` | Flattened annotation + BAM files | Exon-bin × sample count matrix | SummarizedExperiment object | Exon-level QC and downstream analyses | Use correct `isLongRead` / `isPairedEnd` by platform |
