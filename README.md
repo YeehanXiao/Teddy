@@ -114,3 +114,85 @@ To perform motif search on TE-chimeric transcripts, the `MotifSearch` function c
 ```{r motif, warning=FALSE, eval=FALSE, message=FALSE}
 MotifSearch(object = object, te = te, pwm = pwm, filter = filter, min.score = min.score)
 ```
+
+## Teddy outputs at a glance
+
+```{r teddy-outputs-table, message=FALSE, warning=FALSE}
+suppressPackageStartupMessages({
+  library(dplyr); library(tidyr); library(knitr)
+  has_ke <- requireNamespace("kableExtra", quietly = TRUE)
+})
+
+tbl <- tibble::tribble(
+  ~Level, ~Pipeline_step, ~Key_inputs, ~Key_outputs, ~Object_or_file, ~Core_fields_or_assays, ~Primary_use, ~Notes,
+  "A. Reference / Annotation",
+  "stringtieMerge()", 
+  "Per-sample StringTie GTF; optional reference GTF",
+  "Merged transcript reference",
+  "`N_reference.gtf`",
+  "GTF standard columns; `transcript` / `exon`",
+  "Unified reference for quantification",
+  "Ensure consistent chromosome styles (UCSC/NCBI)",
+
+  "A. Reference / Annotation",
+  "gffcompareAnno()",
+  "`reference` + `N_reference.gtf`",
+  "Annotated reference (novel/known labels)",
+  "`gff*_annotated.gtf`",
+  "`class_code`, `cmp_ref`, `xloc`",
+  "Label known vs. novel models",
+  "Keep `transcript_id` / `gene_id` intact",
+
+  "A. Reference / Annotation",
+  "prepareAnno()",
+  "`annotated.gtf` + TE annotation (GRanges)",
+  "Flattened exon bins w/ TE labels",
+  "`anno_compare_*.rds` (GRanges)",
+  "`tx_id`, `tx_name`, `exonic_part`, `transposon`",
+  "Feature-level counting reference",
+  "Match `seqlevelsStyle` with BAM & TE",
+
+  "B. Exon-level counts",
+  "countAnno()",
+  "`anno_compare_*` + BAM(s)",
+  "Exon-bin × sample counts",
+  "`*_se*.rds` (SummarizedExperiment)",
+  "`assays=counts`; rowRanges carry TE fields",
+  "Exon-level QC / DE / visuals",
+  "`isLongRead` / `isPairedEnd` set by platform",
+
+  "C. Transcript-level abundance",
+  "stringtieCombine()",
+  "`annotated.gtf` (reference) + BAM(s) + GTF(s)",
+  "Transcript-level abundance + full GTF",
+  "`*_combineSE*.rds` (SummarizedExperiment)",
+  "`assays=TPM/FPKM/cov`; `metadata$gtf`=full GTF",
+  "Cross-platform expression & structure",
+  "Use `longRead=TRUE` for ONT/PacBio; ensure rownames=transcript_id"
+)
+
+# Fallback clean column names for rendering
+colnames(tbl) <- c("Level","Step","Inputs","Outputs","Object / File","Core fields / assays","Primary use","Notes")
+
+if (!has_ke) {
+  # Plain Markdown fallback (GitHub-friendly)
+  knitr::kable(tbl, format = "markdown", align = "l")
+} else {
+  # Styled HTML table (when knitting to HTML/PDF)
+  kableExtra::kable(tbl, format = "html", escape = FALSE, align = "l", booktabs = TRUE) |>
+    kableExtra::kable_styling(
+      bootstrap_options = c("striped", "hover", "condensed"),
+      full_width = FALSE, fixed_thead = TRUE, font_size = 13
+    ) |>
+    kableExtra::row_spec(0, bold = TRUE) |>
+    kableExtra::collapse_rows(columns = 1, valign = "top") |>
+    kableExtra::column_spec(1, width = "14em") |>
+    kableExtra::column_spec(2, width = "14em") |>
+    kableExtra::column_spec(3, width = "16em") |>
+    kableExtra::column_spec(4, width = "15em") |>
+    kableExtra::column_spec(5, width = "16em") |>
+    kableExtra::column_spec(6, width = "20em") |>
+    kableExtra::column_spec(7, width = "16em") |>
+    kableExtra::column_spec(8, width = "18em") |>
+    kableExtra::htmltools_value() # ensure proper HTML injection
+}
