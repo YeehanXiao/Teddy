@@ -119,10 +119,10 @@ MotifSearch(object = object, te = te, pwm = pwm, filter = filter, min.score = mi
 
 
 
-| Level | Step | Inputs | Outputs | Object / File | Core fields / assays | Primary use | Notes |
-|-------|------|--------|---------|----------------|-----------------------|-------------|-------|
-| **A. Reference / Annotation** | `stringtieMerge()` | Per-sample GTF; optional reference GTF | Merged transcript reference | `N_reference.gtf` | GTF standard columns; `transcript`/`exon` | Unified reference for quantification | Ensure consistent chromosome styles (UCSC/NCBI) |
-| **A. Reference / Annotation** | `gffcompareAnno()` | `reference` + `N_reference.gtf` | Annotated reference (novel/known labels) | `gff*_annotated.gtf` | `class_code`, `cmp_ref`, `xloc` | Label known vs. novel models | Keep `transcript_id`/`gene_id` intact |
-| **A. Reference / Annotation** | `prepareAnno()` | `annotated.gtf` + TE annotation (GRanges) | Flattened exon bins w/ TE labels | `anno_compare_*.rds` | `tx_id`, `tx_name`, `exonic_part`, `transposon` | Feature-level counting reference | Match `seqlevelsStyle` with BAM & TE |
-| **B. Exon-level counts** | `countAnno()` | `anno_compare_*` + BAM(s) | Exon-bin × sample counts | `*_se*.rds` (SummarizedExperiment) | `assays=counts`; rowRanges carry TE fields | Exon-level QC / DE / visuals | `isLongRead` / `isPairedEnd` set by platform |
-| **C. Transcript-level abundance** | `stringtieCombine()` | `annotated.gtf` (reference) + BAM(s) + GTF(s) | Transcript-level abundance + full GTF | `*_combineSE*.rds` (SummarizedExperiment) | `assays=TPM/FPKM/cov`; `metadata$gtf`=full GTF | Cross-platform expression & structure | Use `longRead=TRUE` for ONT/PacBio; ensure rownames=transcript_id |
+## Teddy outputs at a glance
+
+| Level | Steps / Functions | Key Inputs | Key Outputs | Object | Primary use | Notes |
+|-------|-------------------|------------|-------------|--------|-------------|-------|
+| **A. Reference & Annotation** | `stringtieMerge()`<br>`gffcompareAnno()`<br>`prepareAnno()` | Per-sample StringTie GTF; optional reference<br>Reference GTF + merged GTF<br>Annotated GTF + TE annotation (GRanges) | Unified transcript reference<br>Annotated transcript reference<br>Flattened exon bins with TE labels | Merged GTF<br>Annotated merged GTF<br>GRanges object | Provide unified reference<br>Label known vs novel isoforms<br>Enable exon-level counting with TE | Ensure consistent chromosome naming<br>Preserve `transcript_id` / `gene_id`<br>Match `seqlevelsStyle` with BAM & TE |
+| **B. Exon-level counts** | `countAnno()` | Flattened annotation + BAM files | Exon-bin × sample count matrix | SummarizedExperiment object | Exon-level QC and downstream analyses | Use correct `isLongRead` / `isPairedEnd` by platform |
+| **C. Transcript-level abundance** | `stringtieCombine()` | Annotated merged GTF + BAM files + per-sample GTFs | Transcript-level abundance estimates + full GTF | SummarizedExperiment object | Cross-platform expression & structure analysis | Use `longRead=TRUE` for ONT/PacBio; ensure rownames = `transcript_id` |
