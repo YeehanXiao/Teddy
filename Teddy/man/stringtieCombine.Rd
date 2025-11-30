@@ -4,19 +4,12 @@
 \alias{stringtieCombine}
 \title{Consolidataion of information on transcript assembly of multiple samples}
 \usage{
-stringtieCombine(
-  reference = NULL,
-  bamfile = NULL,
-  gtfFiles = NULL,
-  params = ""
-)
+stringtieCombine(reference = NULL, bamfile = NULL, gtfFile = NULL, params = "")
 }
 \arguments{
 \item{reference}{Compared with a reference annotation files}
 
 \item{bamfile}{Bamfile, must be of SAM/BAM/CRAM format, sorted by their genomic location.}
-
-\item{gtfFiles}{Output GTF files}
 
 \item{params}{Other parameters}
 }

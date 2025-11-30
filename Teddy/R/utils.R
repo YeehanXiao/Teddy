@@ -5,8 +5,20 @@
   }
   args <- gsub("^ *| *$", "", args)
   args <- unlist(strsplit(args, split = " "))
-  bin <- file.path(system.file(package = "Rstringtie"), "stringtie")
+  bin <- file.path(system.file(package = "Teddy"), "stringtie")
   output <- system2(command = bin, args = args)
+}
+
+
+.Stringtiebin3 <- function(args = "") {
+  if (is.null(args) || args == "") {
+    stop("The stringtie binaries need to be called with additional arguments")
+  }
+  args <- gsub("^ *| *$", "", args)
+  args <- unlist(strsplit(args, split = " "))
+  bin <- file.path(system.file(package = "Teddy"), "stringtie3", "stringtie")
+  output <- system2(command = bin, args = args)
+  return(output)
 }
 
 .gffcompareBin <- function(args = "") {
@@ -16,7 +28,7 @@
   }
   args <- gsub("^ *| *$", "", args)
   args <- unlist(strsplit(args, split = " "))
-  bin <- file.path(system.file(package = "Rstringtie"), "gffcompare")
+  bin <- file.path(system.file(package = "Teddy"), "gffcompare")
   output <- system2(command = bin, args = args)
 }
 

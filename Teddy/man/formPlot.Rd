@@ -7,17 +7,17 @@
 formPlot(GTF, txid = NULL, rank = 1, geneName = "Gene", TEname = "MT2B2")
 }
 \arguments{
-\item{GTF}{A Granges object, extracted from the output of stringtieCombine\code{\link{stringtieCombine}},
+\item{GTF}{A Granges object, extracted from the output of stringtieCombine{\code{\link{stringtieCombine}}},
 filtered to rows with the type "exon". Use the \code{loadData} function to view the specific format.}
 
-\item{txid}{The transcript ID of the TE-chimeric transcript for which the formation is to be plotted.}
+\item{txid}{The transcript ID of the TE-chimeric transcript to be plotted.}
 
-\item{rank}{Int. The index of the exon in which the TE element is located in the chimeric event. 
-This information can be obtained by referring to \item{annotation} or the output of \code{\link{stringtieCombine}}.}
+\item{rank}{Integer. The index of the exon in which the TE element is located in the chimeric event.
+This information can be obtained from the \code{annotation} or the output of \code{\link{stringtieCombine}}.}
 
 \item{geneName}{The gene name to which the transcript belongs.}
 
-\item{TEname}{The TE element involved in the fusion}
+\item{TEname}{The TE element involved in the fusion.}
 }
 \description{
 Plot the formation of a specific transcript

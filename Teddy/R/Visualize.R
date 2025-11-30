@@ -1,14 +1,13 @@
 #' @title Plot the formation of a specific transcript
-#' @param GTF A Granges object, extracted from the output of stringtieCombine\code{\link{stringtieCombine}},
+#' @param GTF A Granges object, extracted from the output of stringtieCombine{\code{\link{stringtieCombine}}},
 #' filtered to rows with the type "exon". Use the \code{loadData} function to view the specific format.
 #' @param geneName The gene name to which the transcript belongs.
-#' @param TEname The TE element involved in the fusion
-#' @param txid The transcript ID of the TE-chimeric transcript for which the formation is to be plotted.
-#' @param rank Int. The index of the exon in which the TE element is located in the chimeric event. 
-#' This information can be obtained by referring to \item{annotation} or the output of \code{\link{stringtieCombine}}.
+#' @param TEname The TE element involved in the fusion.
+#' @param txid The transcript ID of the TE-chimeric transcript to be plotted. 
+#' @param rank Integer. The index of the exon in which the TE element is located in the chimeric event.
+#' This information can be obtained from the \code{annotation} or the output of \code{\link{stringtieCombine}}.
 #' @importFrom ggplot2 ggplot geom_rect geom_segment geom_text
 #' @export
-#'   
 formPlot <- function(GTF,txid = NULL,rank = 1,geneName = "Gene", TEname = "MT2B2") {
   pic_table <- GTF[GTF$transcript_id == txid]
   if(length(pic_table) == 0) {

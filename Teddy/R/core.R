@@ -1,21 +1,41 @@
 #' @title R wrapper to Run stringtie
-#' @description R wrapper to run stringtie, enabling the reconstruction of
-#' transcriptome from RNA-seq reads
-#' @param bam Character, a bam file from RNA-Seq reads sorted by genomic location
-#' @param reference Character, a genome reference to guide transcript assembly
-#' @param gtfFiles Output GTF files
-#' @param params Other parameters
+#' @description Run stringtie for transcriptome assembly 
+#' @param bam Character, BAM file (sorted by genomic coordinates)
+#' @param reference Character, reference annotation GTF (optional)
+#' @param outfile Character, output GTF file name
+#' @param params Character, extra parameters (default "")
+#' @param longRead Logical, whether the data is long-read (PacBio/ONT). Default FALSE (short-read).
+
 #'
 #' @export
-stringtieAssembly <- function(bam, reference, gtfFiles, params = "") {
-  reference <- paste("-G", reference, sep = " ")
-  outfile <- paste0("-o", gtfFiles, sep = " ")
-  cmd <- sprintf("%s %s %s %s",
-                 bam,
-                 reference,
-                 outfile,
-                 params)
-  return(invisible(lapply(cmd, .Stringtiebin)))
+stringtieAssembly <- function(bam, reference = NULL, outfile, params = "", longRead = FALSE) {
+  if (!all(file.exists(bam))) stop("BAM file not found: ", bam)
+  
+  args <- c(bam)
+  
+  if (longRead) {
+    args <- c(args, "-L")
+  }
+  
+
+  if (!is.null(reference)) {
+    args <- c(args, "-G", reference)
+  }
+  
+  args <- c(args, "-o", outfile)
+  
+
+  if (nzchar(params)) {
+    args <- c(args, strsplit(params, "\\s+")[[1]])
+  }
+
+  if (longRead) {
+    rc <- .Stringtiebin3(paste(args, collapse = " "))
+  } else {
+    rc <- .Stringtiebin(paste(args, collapse = " "))
+  }
+  
+  invisible(rc)
 }
 
 #' @title R wrapper to Run stringtie tool
@@ -68,16 +88,15 @@ gffcompareAnno <- function(reference, gtffile, outfile, params = "") {
 #' @param singleGens Whether to allocate the exon overlapping with two genes to a single gene. Default is TRUE.
 #' @param transposon A GRanges object with transposon data
 #' @param minoverlap Minimum overlap for \code{\link[IRanges]{findOverlaps}}. Default is 10.
+#' @param cores Number of cores used for parallel processing. Default is 1.
+#' @importFrom BiocParallel bplapply MulticoreParam
 #' @importFrom rtracklayer import.gff
-#' @importFrom GenomicFeatures exonicParts
-#' @importFrom GenomicFeatures makeTxDbFromGRanges
+#' @importFrom GenomicFeatures exonicParts makeTxDbFromGRanges
 #' @importFrom GenomicRanges strand
 #' @importFrom IRanges findOverlaps
-#' @importFrom S4Vectors subjectHits
-#' @importFrom S4Vectors queryHits
-#' @importFrom S4Vectors mcols
+#' @importFrom S4Vectors subjectHits queryHits mcols
 #' @export
-prepareAnno <- function(gtffile, singleGens = TRUE, transposon = NULL, minoverlap = 10) {
+prepareAnno <- function(gtffile, singleGens = TRUE, transposon = NULL, minoverlap = 10,  cores = 4) {
   gtfGr <- rtracklayer::import.gff(con = gtffile)
   message("Remove transcripts missing strand information.")
   gtfGr <- gtfGr[!GenomicRanges::strand(gtfGr) == "*"]
@@ -88,17 +107,20 @@ prepareAnno <- function(gtffile, singleGens = TRUE, transposon = NULL, minoverla
                     f = exonicParts$gene_id, drop = TRUE)
   gestrand <- split(x = GenomicRanges::strand(exonicParts), 
                     f = exonicParts$gene_id, drop = TRUE)
-  exonicpart <- base::lapply(names(exonrank), FUN = function(x) {
-    if(unique(as.character(gestrand[[x]])) == "-") {
-      exonrank[[x]] <- order(as.integer(exonrank[[x]]),decreasing = TRUE)
+  
+  message("Using ", cores, " cores for exon rank ordering.")
+  exonicpart <- BiocParallel::bplapply(names(exonrank), BPPARAM = BiocParallel::MulticoreParam(cores), FUN = function(x) {
+    if (unique(as.character(gestrand[[x]])) == "-") {
+      order(as.integer(exonrank[[x]]), decreasing = TRUE)
     } else {
-      exonrank[[x]] <- exonrank[[x]]
+      order(as.integer(exonrank[[x]]))
     }
   })
+
   names(exonicpart) <- names(exonrank)
   exonicpart <- exonicpart[unique(exonicParts$gene_id)]
   exonicParts$exonic_part <- unlist(exonicpart)
-  
+
   if (!is.null(transposon)) {
     if (!c("names") %in% colnames(S4Vectors::mcols(transposon)) || !is(transposon, "GRanges")) {
       stop("Transposone must be a Granges object that includes a column named 'names'.")
@@ -111,94 +133,114 @@ prepareAnno <- function(gtffile, singleGens = TRUE, transposon = NULL, minoverla
     exonicParts$transposon <- "none"
     exonicParts$transposon[as.numeric(names(repeats))] <- unlist(repeats)
   }
-  
+
   return(exonicParts)
 }
 
-#' @title Consolidataion of information on transcript assembly of multiple samples
+#' @title Consolidation of information on transcript assembly of multiple samples
 #' @description Transcript-quantification is prerequisite for many downstream investigations.
-#'  Several metrics have been proposed for measuring abundance in transcript level based on
-#'  RNA-seq data.
-#' @param reference Compared with a reference annotation files
-#' @param bamfile Bamfile, must be of SAM/BAM/CRAM format, sorted by their genomic location.
-#' @param gtfFiles Output GTF files
-#' @param params Other parameters
+#' Several metrics have been proposed for measuring abundance in transcript level based on RNA-seq data.
+#' @param reference Compared with a reference annotation file
+#' @param bamFiles Character vector. BAM files (sorted by coordinate).
+#' @param gtfFiles Character vector. Output GTF files (will be overwritten after re-quantification).
+#' @param params Other parameters for StringTie
+#' @param longRead Logical scalar or vector: TRUE for ONT/PacBio
+#' @param cores Number of cores to use in parallel (default: 1)
 #' @export
-#' 
-stringtieCombine <- function(reference = NULL, bamfile = NULL, gtfFiles = NULL, params = "") {
-  # step 1: Quantify
-  params = paste("-e", params)
-  stringtieAssembly(bam = bamfile, 
-                    reference = reference, 
-                    gtfFiles = gtfFiles, 
-                    params = params)
-  
-  # step 2: Preprocess gtf
+stringtieCombine <- function(reference = NULL, bamFiles = NULL, gtfFiles = NULL,
+                             params = "", longRead = FALSE, cores = 1) {
+  if (is.null(reference)) stop("Please provide the reference annotation file.")
+  if (is.null(bamFiles) || is.null(gtfFiles)) stop("Please provide both `bamFiles` and `gtfFiles`.")
+  if (length(bamFiles) != length(gtfFiles)) stop("`bamFiles` and `gtfFiles` must have the same length.")
+
+  ## step 1: Re-quantify with -e (overwrite requested) - parallel version
+  rq_params <- paste("-e", params)
+  message("Re-quantifying transcript abundance using ", cores, " core(s)...")
+  parallel::mclapply(seq_along(bamFiles), function(i) {
+    Teddy::stringtieAssembly(
+      bam       = bamFiles[i],
+      reference = reference,
+      outfile   = gtfFiles[i],
+      params    = rq_params,
+      longRead  = longRead
+    )
+  }, mc.cores = cores)
+
+  ## step 2: Preprocess gtf
   gtfGR <- rtracklayer::import.gff(reference)
   index <- which(gtfGR$type == "transcript")
   gtfGR$gene_name <- rep(gtfGR$gene_name[index], c(index[2:length(index)], length(gtfGR) + 1) - index)
   gtfGR$gene_name <- ifelse(is.na(gtfGR$gene_name), gtfGR$gene_id, gtfGR$gene_name)
   transcriptGR <- gtfGR[index]
-  
-  # step 3: Extract quantification results
-  SElist <- lapply(X = gtfFiles, 
-                   FUN = .ExtractTranscript, 
+
+  ## step 3: Extract quantification results
+  SElist <- lapply(X = gtfFiles,
+                   FUN = .ExtractTranscript,
                    transcriptGR = transcriptGR)
-  
-  
-  # step 4: Create SummarizedExperiment object
+
+  ## step 4: Create SummarizedExperiment object
   SE <- do.call(IRanges::cbind, SElist)
   S4Vectors::metadata(SE) <- list(gtf = gtfGR)
   return(SE)
 }
 
 #' @title Counting reads on the exon
-#' @description Counting the number of reads that falls into each of the exon
-#' counting bins defined in the flattened GFF object.
-#' @param annotation Flattened GFF object.
-#' @param bamfile Name of the BAM file(s).
-#' @param strandSpecific An integer vector indicating if strand-specific read
-#' counting should be performed. See \code{\link[Rsubread]{featureCounts}}
-#' @param allowMultiOverlap Logical indicating if a read is allowed to be
-#' assigned to more than one feature (or meta-feature) if it is found to
-#' overlap with more than one feature (or meta-feature). TRUE by default.
-#' @param isPairedEnd A logical scalar or a logical vector, indicating whether
-#' libraries contain paired-end reads or not.
-#' @param nthreads An integer specifying the number of threads to be used.
-#' @param ... Additional arguments. See \code{\link[Rsubread]{featureCounts}}
+#' @description Counting the number of reads that fall into each exon
+#' bin defined in the flattened GTF/GFF object.
+#' @param annotation A GRanges object, typically from prepareAnno().
+#' @param bamfile Character vector of BAM file(s).
+#' @param isPairedEnd Logical scalar or vector, whether the library is paired-end.
+#' @param strandSpecific Integer: 0 (unstranded), 1 (forward), or 2 (reverse).
+#' @param allowMultiOverlap Logical, whether to allow reads to overlap multiple features.
+#' @param isLongRead Logical, whether this is long-read data (e.g. ONT, PacBio).
+#' @param nthreads Number of threads to use.
+#' @param ... Additional arguments passed to featureCounts().
+#'
 #' @importFrom SummarizedExperiment SummarizedExperiment
 #' @importFrom Rsubread featureCounts
-#'
 #' @export
 countAnno <- function(annotation, bamfile,
                       isPairedEnd = TRUE,
                       strandSpecific = 0,
                       allowMultiOverlap = TRUE,
+                      isLongRead = FALSE,
                       nthreads = 1,
                       ...) {
-  #bam <- BamFileList(bamfile)
-  #count <- GenomicAlignments::summarizeOverlaps(
-  #          features = annotation,
-  #          reads = bam,
-  #          singleEnd = singleEnd,
-  #          ...)
-  #return(count)
+  
   annframe <- as.data.frame(annotation)
   names(annframe)[names(annframe) == "seqnames"] <- "Chr"
   annframe$GeneId <- paste(annotation$gene_id, annotation$exonic_part, sep = ":")
-  hints <- Rsubread::featureCounts(files = bamfile,
-                                   annot.ext = annframe,
-                                   strandSpecific = strandSpecific,
-                                   allowMultiOverlap = allowMultiOverlap,
-                                   isPairedEnd = isPairedEnd,
-                                   useMetaFeatures = FALSE,
-                                   isGTFAnnotationFile = FALSE,
-                                   nthreads = nthreads,
-                                   ...)
-  se <- SummarizedExperiment::SummarizedExperiment(list(counts = as.matrix(hints$counts)),
-                                                   rowRanges = annotation)
+  
+  fc_args <- list(
+    files = bamfile,
+    annot.ext = annframe,
+    isGTFAnnotationFile = FALSE,
+    useMetaFeatures = FALSE,
+    isPairedEnd = isPairedEnd,
+    strandSpecific = strandSpecific,
+    allowMultiOverlap = allowMultiOverlap,
+    nthreads = nthreads,
+    ...
+  )
+  
+  if (isLongRead) {
+    fc_args$isLongRead <- TRUE
+    if ("maxMOp" %in% names(fc_args)) {
+      fc_args$maxMOp <- NULL
+      warning("Long-read mode detected: Ignoring 'maxMOp'. Only 'isLongRead=TRUE' will be used.")
+    }
+  }
+  
+  fc_result <- do.call(Rsubread::featureCounts, fc_args)
+  
+  se <- SummarizedExperiment::SummarizedExperiment(
+    list(counts = as.matrix(fc_result$counts)),
+    rowRanges = annotation
+  )
   return(se)
 }
+
+
 
 #' Extract GTF information
 #'
@@ -387,7 +429,8 @@ extractTest <- function(object){
 #' @param genes Specify the genes for the calculation of foldchanges
 #' @param corssVar Default as "condition"
 #' @importFrom BiocParallel bplapply
-#' @import statmod methods stats
+#' @import statmod methods 
+#' @importFrom stats as.formula
 #' @export
 calculateFoldchange <- function(object,
                                 genes,
@@ -421,4 +464,102 @@ calculateFoldchange <- function(object,
     names(alleffects) <- genes
   }
   return(alleffects)
+}
+
+
+
+
+
+
+
+
+#' Process GTF and SummarizedExperiment for TE overlap analysis
+#'
+#' This function processes a GTF file or a SummarizedExperiment object to identify overlaps with transposable elements (TE).
+#' It can handle both external (local) GTF files and in-memory SummarizedExperiment objects. 
+#' The function extracts exon and transcript information, finds overlaps with TE annotations, and filters out transcripts with zero expression.
+#'
+#' @param gtfFile Character. Path to the GTF file (optional, required if combineSE is NULL).
+#' @param te GRanges object. Transposable element annotations, required for overlap analysis.
+#' The `te` object must contain at least three metadata columns: `names`, `family`, and `class`. 
+#' @param combineSE SummarizedExperiment. Pre-processed RNA-seq quantification object (optional, required if gtfFile is NULL).
+#' @param minoverlap Integer. Minimum required overlap (in base pairs) between GTF exons and TE annotations.
+#' @param threads Integer. Number of threads to use for parallel processing. Default is 4.
+#' 
+#' @return A GRanges object with transcripts overlapping TEs, annotated with TE information.
+#' 
+#' @import BiocParallel
+#' @import GenomicRanges
+#' @importFrom rtracklayer import
+#' 
+#' @export
+processGTF <- function(te, gtf_path = NULL, combineSE = NULL, minoverlap = 0,threads = 9) {
+  
+  # Load GTF data from either combineSE or GTF path
+  if (!is.null(combineSE)) {
+    GTF <- combineSE@metadata$gtf
+  } else if (!is.null(gtf_path)) {
+    #GTF <- readRDS(gtf_path)
+    GTF <- rtracklayer::import(gtf_path)
+  } else {
+    stop("Please provide either a GTF path or a combineSE object.")
+  }
+  
+  # Filter to include only exons
+  exon_index <- GTF$type == "exon"
+  GTF <- GTF[exon_index, ]
+  
+  # Filter out '*' strand
+  GTF <- GTF[GenomicRanges::strand(GTF) != "*"]
+  
+  # Rank exons based on strand direction
+  t_exonRank <- split(x = GTF$exon_number, f = GTF$transcript_id)
+  t_exonRank <- t_exonRank[unique(GTF$transcript_id)]
+  
+  t_gestrand <- split(x = GenomicRanges::strand(GTF), f = GTF$transcript_id, drop = TRUE)
+  t_gestrand <- t_gestrand[unique(GTF$transcript_id)]
+  
+  bp_param <- MulticoreParam(workers = threads)  
+  
+  exoninTx <- bplapply(names(t_exonRank), function(x) {
+    if (unique(as.character(t_gestrand[[x]])) == "-") {
+      order(as.integer(t_exonRank[[x]]), decreasing = TRUE)
+    } else {
+      order(as.integer(t_exonRank[[x]]))
+    }
+  }, BPPARAM = bp_param)
+  
+  
+  
+  names(exoninTx) <- unique(GTF$transcript_id)
+  GTF$tx_exon_rank <- unlist(exoninTx, recursive = FALSE, use.names = TRUE)
+  
+  
+  # Find overlaps between GTF and TE
+  overlaps <- findOverlaps(GTF, te, minoverlap = minoverlap)
+  
+  chi_GTF <- GTF[queryHits(overlaps)]
+  chi_te <- te[subjectHits(overlaps)]
+  
+  # Add TE details to GTF
+  chi_GTF$name <- chi_te$name
+  chi_GTF$family <- chi_te$family
+  chi_GTF$class <- chi_te$class
+  
+  class <- split(x = te$class[S4Vectors::subjectHits(overlaps)], f = S4Vectors::queryHits(overlaps))
+  class <- lapply(class, function(x) paste(x, collapse = ","))
+  
+  repeats <- split(x = te$names[S4Vectors::subjectHits(overlaps)], f = S4Vectors::queryHits(overlaps))
+  repeats <- lapply(repeats, function(x) paste(x, collapse = ","))
+  
+  GTF$TE_name <- "none"
+  GTF$TE_name[as.numeric(names(repeats))] <- unlist(repeats)
+  
+  GTF$TE_class <- "none"
+  GTF$TE_class[as.numeric(names(class))] <- unlist(class)
+  
+  # Filter to keep only rows with TE information
+  CHI_GTF <- GTF[GTF$TE_name != "none", ]
+  
+  return(CHI_GTF)
 }

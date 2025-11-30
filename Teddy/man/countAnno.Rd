@@ -10,30 +10,29 @@ countAnno(
   isPairedEnd = TRUE,
   strandSpecific = 0,
   allowMultiOverlap = TRUE,
+  isLongRead = FALSE,
   nthreads = 1,
   ...
 )
 }
 \arguments{
-\item{annotation}{Flattened GFF object.}
+\item{annotation}{A GRanges object, typically from prepareAnno().}
 
-\item{bamfile}{Name of the BAM file(s).}
+\item{bamfile}{Character vector of BAM file(s).}
 
-\item{isPairedEnd}{A logical scalar or a logical vector, indicating whether
-libraries contain paired-end reads or not.}
+\item{isPairedEnd}{Logical scalar or vector, whether the library is paired-end.}
 
-\item{strandSpecific}{An integer vector indicating if strand-specific read
-counting should be performed. See \code{\link[Rsubread]{featureCounts}}}
+\item{strandSpecific}{Integer: 0 (unstranded), 1 (forward), or 2 (reverse).}
 
-\item{allowMultiOverlap}{Logical indicating if a read is allowed to be
-assigned to more than one feature (or meta-feature) if it is found to
-overlap with more than one feature (or meta-feature). TRUE by default.}
+\item{allowMultiOverlap}{Logical, whether to allow reads to overlap multiple features.}
 
-\item{nthreads}{An integer specifying the number of threads to be used.}
+\item{isLongRead}{Logical, whether this is long-read data (e.g. ONT, PacBio).}
 
-\item{...}{Additional arguments. See \code{\link[Rsubread]{featureCounts}}}
+\item{nthreads}{Number of threads to use.}
+
+\item{...}{Additional arguments passed to featureCounts().}
 }
 \description{
-Counting the number of reads that falls into each of the exon
-counting bins defined in the flattened GFF object.
+Counting the number of reads that fall into each exon
+bin defined in the flattened GTF/GFF object.
 }

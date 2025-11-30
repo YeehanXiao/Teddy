@@ -4,18 +4,25 @@
 \alias{stringtieAssembly}
 \title{R wrapper to Run stringtie}
 \usage{
-stringtieAssembly(bam, reference, gtfFiles, params = "")
+stringtieAssembly(
+  bam,
+  reference = NULL,
+  outfile,
+  params = "",
+  longRead = FALSE
+)
 }
 \arguments{
-\item{bam}{Character, a bam file from RNA-Seq reads sorted by genomic location}
+\item{bam}{Character, BAM file (sorted by genomic coordinates)}
 
-\item{reference}{Character, a genome reference to guide transcript assembly}
+\item{reference}{Character, reference annotation GTF (optional)}
 
-\item{gtfFiles}{Output GTF files}
+\item{outfile}{Character, output GTF file name}
 
-\item{params}{Other parameters}
+\item{params}{Character, extra parameters (default "")}
+
+\item{longRead}{Logical, whether the data is long-read (PacBio/ONT). Default FALSE (short-read).}
 }
 \description{
-R wrapper to run stringtie, enabling the reconstruction of
-transcriptome from RNA-seq reads
+Run stringtie for transcriptome assembly
 }
