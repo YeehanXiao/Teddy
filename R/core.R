@@ -400,27 +400,35 @@ ChimericDrivenTest <- function(SEobject,
 
 #' @title Extract the result from the differentially expressed TE-chimeric exon test 
 #' @param object An object of DE TE-chimeric exon test, out from \bold{ChimericDrivenTest}.
+#' @param filter Logical. If \code{TRUE} (default), filter out features with \code{NA} adjusted p-values
+#' and features flagged as structural zeros (\code{allZero}).
 #' @export
-extractTest <- function(object){
-  #if(Filter){
-  #  findex <- !is.na(results(object)$padj)
-  #}else{
-  #  findex <- rep(TRUE, nrow(object))
-  #}
-  #findex <- findex & !mcols(object)$allZero
+extractTest <- function(object, filter = TRUE) {
   LRTout <- DESeq2::results(object)
-  chimericCounts_N <- counts(object, normalized = TRUE)[, colData(object)$chimeric == "chimeric"]
+  
+  chimericCounts_N <- DESeq2::counts(object, normalized = TRUE)[, colData(object)$chimeric == "chimeric"]
   LRTout$exonExpr <- rowMeans(chimericCounts_N)
-  LRTout$featureID <- mcols(object)$featureID
-  LRTout$groupID <- mcols(object)$groupID
-  LRTout$TEclass <- mcols(object)$TEclass
-  LRTout$dispersion <- mcols(object)$dispersion
+  
+  LRTout$featureID  <- S4Vectors::mcols(object)$featureID
+  LRTout$groupID    <- S4Vectors::mcols(object)$groupID
+  LRTout$TEclass    <- S4Vectors::mcols(object)$TEclass
+  LRTout$dispersion <- S4Vectors::mcols(object)$dispersion
+  LRTout$allZero    <- S4Vectors::mcols(object)$allZero
+  
+  # Ensure BH-adjusted p-values are present (DESeq2 typically provides this already)
   LRTout$padj <- p.adjust(LRTout$pvalue, method = "BH")
-  LRTout <- LRTout[, c("groupID", "featureID", "exonExpr", "TEclass", "dispersion", "stat", "pvalue", "padj")]
-  # LRTout <- LRTout[findex,]
-  mcols(LRTout)[1:5, 1] <- "input"
-  mcols(LRTout)[1:5, 2] <- c("TranscriptID", "ExonID", "Expression of the exon", "TEclass", "Dispersion estimate among the transcript")
-  return(LRTout)
+  
+  LRTout <- LRTout[, c("groupID", "featureID", "exonExpr", "TEclass",
+                       "dispersion", "stat", "pvalue", "padj", "allZero")]
+  
+  if (isTRUE(filter)) {
+    LRTout <- LRTout[!is.na(LRTout$padj) & !LRTout$allZero, ]
+  }
+  
+  S4Vectors::mcols(LRTout)[1:5, 1] <- "input"
+  S4Vectors::mcols(LRTout)[1:5, 2] <- c("TranscriptID", "ExonID", "Expression of the exon",
+                                        "TEclass", "Dispersion estimate among the transcript")
+  LRTout
 }
 
 #' @title Calculating the fold change
