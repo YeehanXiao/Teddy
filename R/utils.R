@@ -1,6 +1,6 @@
 .Stringtiebin <- function(args = "") {
   if (is.null(args) || args == "") {
-    stop("The stringtie binaries requires additional arguments.")
+    stop("The StringTie executables require additional arguments.")
   }
   args <- gsub("^ *| *$", "", args)
   args <- unlist(strsplit(args, split = " "))
@@ -11,7 +11,7 @@
 
 .Stringtiebin3 <- function(args = "") {
   if (is.null(args) || args == "") {
-    stop("The stringtie binaries requires additional arguments.")
+    stop("The StringTie executables require additional arguments.")
   }
   args <- gsub("^ *| *$", "", args)
   args <- unlist(strsplit(args, split = " "))
@@ -22,7 +22,7 @@
 
 .gffcompareBin <- function(args = "") {
   if (is.null(args) || args == "") {
-    stop("gffcompare requires additional arguments.")
+    stop("Gffcompare requires additional arguments.")
   }
   args <- gsub("^ *| *$", "", args)
   args <- unlist(strsplit(args, split = " "))
