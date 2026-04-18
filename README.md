@@ -67,6 +67,7 @@ R CMD INSTALL Teddy
 If you encounter build errors during compilation, especially after switching machines or modifying source files, consider cleaning previously compiled artifacts before rebuilding:
 
 ```bash
+cd Teddy/src
 make clean
 make -j
 ```

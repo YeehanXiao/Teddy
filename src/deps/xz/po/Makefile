@@ -148,7 +148,7 @@ EXTRA_LOCALE_CATEGORIES =
 XGETTEXT_OPTIONS += --no-wrap
 MSGMERGE += --no-wrap
 
-all: all-no
+all: all-yes
 
 
 .SUFFIXES:
@@ -324,7 +324,7 @@ $(POFILES): $(POFILESDEPS)
 
 install: install-exec install-data
 install-exec:
-install-data: install-data-no
+install-data: install-data-yes
 	if test "$(PACKAGE)" = "gettext-tools"; then \
 	  $(mkdir_p) $(DESTDIR)$(gettextsrcdir); \
 	  for file in $(DISTFILES.common) Makevars.template; do \
@@ -382,7 +382,7 @@ install-strip: install
 
 installdirs: installdirs-exec installdirs-data
 installdirs-exec:
-installdirs-data: installdirs-data-no
+installdirs-data: installdirs-data-yes
 	if test "$(PACKAGE)" = "gettext-tools"; then \
 	  $(mkdir_p) $(DESTDIR)$(gettextsrcdir); \
 	else \
@@ -426,7 +426,7 @@ installcheck:
 
 uninstall: uninstall-exec uninstall-data
 uninstall-exec:
-uninstall-data: uninstall-data-no
+uninstall-data: uninstall-data-yes
 	if test "$(PACKAGE)" = "gettext-tools"; then \
 	  for file in $(DISTFILES.common) Makevars.template; do \
 	    rm -f $(DESTDIR)$(gettextsrcdir)/$$file; \

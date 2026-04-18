@@ -186,10 +186,20 @@ xz-coder.o: coder.c private.h ../../src/common/sysdefs.h ../../config.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_uuid_t.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/gethostuuid.h \
   ../../src/common/tuklib_gettext.h ../../src/common/tuklib_common.h \
-  ../../src/common/tuklib_config.h ../../src/common/tuklib_progname.h \
-  ../../src/common/tuklib_exit.h ../../src/common/tuklib_mbstr.h main.h \
-  mytime.h coder.h message.h args.h hardware.h file_io.h options.h \
-  signals.h suffix.h util.h list.h
+  ../../src/common/tuklib_config.h \
+  /opt/homebrew/opt/gettext/include/libintl.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/xlocale.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_xlocale.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/__xlocale.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_mb_cur_max.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/xlocale/_inttypes.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/xlocale/_stdio.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/xlocale/_stdlib.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/xlocale/_string.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/xlocale/_time.h \
+  ../../src/common/tuklib_progname.h ../../src/common/tuklib_exit.h \
+  ../../src/common/tuklib_mbstr.h main.h mytime.h coder.h message.h \
+  args.h hardware.h file_io.h options.h signals.h suffix.h util.h list.h
 private.h:
 ../../src/common/sysdefs.h:
 ../../config.h:
@@ -387,6 +397,16 @@ private.h:
 ../../src/common/tuklib_gettext.h:
 ../../src/common/tuklib_common.h:
 ../../src/common/tuklib_config.h:
+/opt/homebrew/opt/gettext/include/libintl.h:
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/xlocale.h:
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_xlocale.h:
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/__xlocale.h:
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_mb_cur_max.h:
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/xlocale/_inttypes.h:
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/xlocale/_stdio.h:
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/xlocale/_stdlib.h:
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/xlocale/_string.h:
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/xlocale/_time.h:
 ../../src/common/tuklib_progname.h:
 ../../src/common/tuklib_exit.h:
 ../../src/common/tuklib_mbstr.h:
