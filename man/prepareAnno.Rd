@@ -4,7 +4,13 @@
 \alias{prepareAnno}
 \title{Preparing the genome annotation object}
 \usage{
-prepareAnno(gtffile, singleGens = TRUE, transposon = NULL, minoverlap = 10)
+prepareAnno(
+  gtffile,
+  singleGens = TRUE,
+  transposon = NULL,
+  minoverlap = 10,
+  cores = 4
+)
 }
 \arguments{
 \item{gtffile}{GTF file.}
@@ -14,6 +20,8 @@ prepareAnno(gtffile, singleGens = TRUE, transposon = NULL, minoverlap = 10)
 \item{transposon}{A GRanges object with transposon data}
 
 \item{minoverlap}{Minimum overlap for \code{\link[IRanges]{findOverlaps}}. Default is 10.}
+
+\item{cores}{Number of cores used for parallel processing. Default is 1.}
 }
 \description{
 Flatten exon appearing multiple times among different transcripts in GTF file

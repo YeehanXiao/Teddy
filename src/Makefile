@@ -1,4 +1,4 @@
-.PHONY: all tools-old clean
+.PHONY: all tools-old clean distclean
 
 all: tools-old
 
@@ -19,3 +19,13 @@ clean:
 	cd ./deps/bzip2 && make clean || true
 	cd ./deps/xz && make clean || true
 	rm -rf ./deps/xz/install
+
+distclean: clean
+	find ./deps -name '*.o' -delete
+	find ./deps -name '*.a' -delete
+	find ./deps -name '.DS_Store' -delete
+	find ./deps -name '*.dylib' -delete
+	find ./deps -name '*.so' -delete
+	find ./deps -name '*.lo' -delete
+	find ./deps -name '*.la' -delete
+	find ./deps -name '.libs' -type d -prune -exec rm -rf {} +

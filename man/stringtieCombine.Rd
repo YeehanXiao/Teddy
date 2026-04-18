@@ -2,19 +2,31 @@
 % Please edit documentation in R/core.R
 \name{stringtieCombine}
 \alias{stringtieCombine}
-\title{Consolidataion of information on transcript assembly of multiple samples}
+\title{Consolidation of information on transcript assembly of multiple samples}
 \usage{
-stringtieCombine(reference = NULL, bamfile = NULL, gtfFile = NULL, params = "")
+stringtieCombine(
+  reference = NULL,
+  bamFiles = NULL,
+  gtfFiles = NULL,
+  params = "",
+  longRead = FALSE,
+  cores = 1
+)
 }
 \arguments{
-\item{reference}{Compared with a reference annotation files}
+\item{reference}{Compared with a reference annotation file}
 
-\item{bamfile}{Bamfile, must be of SAM/BAM/CRAM format, sorted by their genomic location.}
+\item{bamFiles}{Character vector. BAM files (sorted by coordinate).}
 
-\item{params}{Other parameters}
+\item{gtfFiles}{Character vector. Output GTF files (will be overwritten after re-quantification).}
+
+\item{params}{Other parameters for StringTie}
+
+\item{longRead}{Logical scalar or vector: TRUE for ONT/PacBio}
+
+\item{cores}{Number of cores to use in parallel (default: 1)}
 }
 \description{
 Transcript-quantification is prerequisite for many downstream investigations.
- Several metrics have been proposed for measuring abundance in transcript level based on
- RNA-seq data.
+Several metrics have been proposed for measuring abundance in transcript level based on RNA-seq data.
 }

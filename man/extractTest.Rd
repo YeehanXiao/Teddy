@@ -4,10 +4,13 @@
 \alias{extractTest}
 \title{Extract the result from the differentially expressed TE-chimeric exon test}
 \usage{
-extractTest(object)
+extractTest(object, filter = TRUE)
 }
 \arguments{
 \item{object}{An object of DE TE-chimeric exon test, out from \bold{ChimericDrivenTest}.}
+
+\item{filter}{Logical. If \code{TRUE} (default), filter out features with \code{NA} adjusted p-values
+and features flagged as structural zeros (\code{allZero}).}
 }
 \description{
 Extract the result from the differentially expressed TE-chimeric exon test

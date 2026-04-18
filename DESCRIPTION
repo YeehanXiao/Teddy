@@ -23,7 +23,12 @@ Imports:
     DESeq2,
     statmod,
     BiocParallel,
+    MatrixGenerics,
+    Biostrings,
+    dplyr,
+    ggplot2,
     methods,
-    stats,
-    MatrixGenerics
-RoxygenNote: 7.3.2
+    stats
+Suggests:
+    BSgenome.Mmusculus.UCSC.mm10
+RoxygenNote: 7.3.3
