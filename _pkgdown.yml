@@ -1,0 +1,21 @@
+url: https://yeehanxiao.github.io/Teddy/
+template:
+  bootstrap: 5
+navbar:
+  structure:
+    left: [home, tutorials, reference]
+    right: [github]
+  components:
+    tutorials:
+      text: Tutorials
+reference:
+  - title: "Core Pipeline"
+    contents:
+      - stringtieAssembly
+      - stringtieMerge
+      - stringtieCombine
+  - title: "Annotation & Counting"
+    contents:
+      - gffcompareAnno
+      - prepareAnno
+      - countAnno

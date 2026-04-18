@@ -30,5 +30,4 @@ Imports:
     methods,
     stats
 Suggests:
-    BSgenome.Mmusculus.UCSC.mm10
 RoxygenNote: 7.3.3
