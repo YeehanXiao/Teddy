@@ -1,0 +1,23 @@
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/reference/ChimericDrivenTest.html</loc></url>
+<url><loc>/reference/MotifSearch.html</loc></url>
+<url><loc>/reference/calculateFoldchange.html</loc></url>
+<url><loc>/reference/countAnno.html</loc></url>
+<url><loc>/reference/diffBinPlot.html</loc></url>
+<url><loc>/reference/extractGTF.html</loc></url>
+<url><loc>/reference/extractTest.html</loc></url>
+<url><loc>/reference/formPlot.html</loc></url>
+<url><loc>/reference/gffcompareAnno.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/pcmFunction.html</loc></url>
+<url><loc>/reference/prepareAnno.html</loc></url>
+<url><loc>/reference/processGTF.html</loc></url>
+<url><loc>/reference/stringtieAssembly.html</loc></url>
+<url><loc>/reference/stringtieCombine.html</loc></url>
+<url><loc>/reference/stringtieMerge.html</loc></url>
+</urlset>
+
