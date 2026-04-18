@@ -4,59 +4,48 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Analysis of TE-Dependent Gene Isoforms • Teddy</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
-<script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script><meta property="og:title" content="Analysis of TE-Dependent Gene Isoforms">
-<meta property="og:description" content="Teddy provides functions for identifying, quantifying, and analyzing TE-dependent gene isoforms from transcriptome sequencing data.">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>TEDDY • Teddy</title>
+<script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="TEDDY">
+<meta name="description" content="TE-dependent / TE-chimeric transcript analysis framework">
+<meta property="og:description" content="TE-dependent / TE-chimeric transcript analysis framework">
 </head>
-<body data-spy="scroll" data-target="#toc">
+<body>
+    <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <div class="container template-home">
-      <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
-  <div class="container">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <span class="navbar-brand">
-        <a class="navbar-link" href="index.html">Teddy</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0</span>
-      </span>
-    </div>
+    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
-    <div id="navbar" class="navbar-collapse collapse">
-      <ul class="nav navbar-nav">
-<li>
-  <a href="reference/index.html">Reference</a>
-</li>
+    <a class="navbar-brand me-2" href="index.html">Teddy</a>
+
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0</small>
+
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar" class="collapse navbar-collapse ms-3">
+      <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/YeehanXiao/Teddy/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+      </ul>
 </div>
-<!--/.nav-collapse -->
+
+
   </div>
-<!--/.container -->
-</div>
-<!--/.navbar -->
-
-
-
-      </header><div class="row">
-  <div class="contents col-md-9">
-
-<div class="section level1">
+</nav><div class="container template-home">
+<div class="row">
+  <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="teddy">
 <strong>TEDDY</strong><a class="anchor" aria-label="anchor" href="#teddy"></a>
 </h1></div>
@@ -70,64 +59,136 @@
 <div class="section level2">
 <h2 id="id_1-getting-started">1. Getting Started<a class="anchor" aria-label="anchor" href="#id_1-getting-started"></a>
 </h2>
-<p><strong>1.1 Preparation</strong></p>
+<div class="section level3">
+<h3 id="id_11-preparation">1.1 Preparation<a class="anchor" aria-label="anchor" href="#id_11-preparation"></a>
+</h3>
 <p>To compile Teddy and all dependencies:</p>
-<p><code>{shell prepare2, warning=FALSE, eval=FALSE, message=FALSE} cd Teddy cd src &amp;&amp; make -j</code></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="bu">cd</span> Teddy</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="bu">cd</span> src <span class="kw">&amp;&amp;</span> <span class="fu">make</span> <span class="at">-j</span></span></code></pre></div>
 <p>All required libraries (libdeflate, xz, bzip2) are included under <code>src/deps</code>, and will be compiled automatically.</p>
-<p><strong>1.2 Installation</strong></p>
+</div>
+<div class="section level3">
+<h3 id="id_12-installation">1.2 Installation<a class="anchor" aria-label="anchor" href="#id_12-installation"></a>
+</h3>
 <p>Since <code>Teddy</code> relies on several bioinformatics packages from Bioconductor, you need to install these dependencies first before installing the <code>Teddy</code> package itself.</p>
 <p><strong>Step 1: Install Dependencies (in R console)</strong></p>
 <p>Please open your R console and run the following commands to ensure all required packages are installed:</p>
-<p>```{r install_deps, warning=FALSE, eval=FALSE, message=FALSE} # Install BiocManager if not already installed if (!require(“BiocManager”, quietly = TRUE)) install.packages(“BiocManager”)</p>
-</div>
-</div>
-<div class="section level1">
-<h1 id="install-required-dependencies-from-bioconductor">Install required dependencies from Bioconductor<a class="anchor" aria-label="anchor" href="#install-required-dependencies-from-bioconductor"></a>
-</h1>
-<p>BiocManager::install(c( “rtracklayer”, “GenomicFeatures”, “Rsamtools”, “GenomicAlignments”, “GenomicRanges”, “IRanges”, “S4Vectors”, “SummarizedExperiment”, “Rsubread”, “DESeq2”, “statmod”, “BiocParallel”, “MatrixGenerics” ))</p>
-</div>
-<div class="section level1">
-<h1 id="install-the-default-mouse-genome-package-used-by-teddy">Install the default mouse genome package used by Teddy<a class="anchor" aria-label="anchor" href="#install-the-default-mouse-genome-package-used-by-teddy"></a>
-</h1>
-<p>BiocManager::install(“BSgenome.Mmusculus.UCSC.mm10”)</p>
-<pre><code>
-&gt; **Note on Reference Genomes:** `Teddy` uses the mouse genome (`mm10`) as the default parameter in some functions. If you are working with other species (e.g., Human `hg38`), you will need to install the corresponding `BSgenome` package and specify it in the function arguments.
-
-**Step 2: Install Teddy (in Terminal)**
-
-After the dependencies are installed and the preparation step is complete, return to your terminal. Navigate back to the parent directory and install the package:
-
-```{shell install_teddy, warning=FALSE, eval=FALSE, message=FALSE}
-cd ../..
-R CMD INSTALL Teddy</code></pre>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Install BiocManager if not already installed</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://bioconductor.github.io/BiocManager/" class="external-link">"BiocManager"</a></span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Install required dependencies from Bioconductor</span></span>
+<span><span class="va">bioc_deps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"rtracklayer"</span>, <span class="st">"GenomicFeatures"</span>, <span class="st">"Rsamtools"</span>, </span>
+<span>  <span class="st">"GenomicAlignments"</span>, <span class="st">"GenomicRanges"</span>, <span class="st">"IRanges"</span>, </span>
+<span>  <span class="st">"S4Vectors"</span>, <span class="st">"SummarizedExperiment"</span>, <span class="st">"Rsubread"</span>, </span>
+<span>  <span class="st">"DESeq2"</span>, <span class="st">"statmod"</span>, <span class="st">"BiocParallel"</span>, <span class="st">"MatrixGenerics"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="va">bioc_deps</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Install the default mouse genome package used by Teddy</span></span>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"BSgenome.Mmusculus.UCSC.mm10"</span><span class="op">)</span></span></code></pre></div>
+<blockquote>
+<p><strong>Note on Reference Genomes:</strong> <code>Teddy</code> uses the mouse genome (<code>mm10</code>) as the default parameter in some functions. If you are working with other species (e.g., Human <code>hg38</code>), you will need to install the corresponding <code>BSgenome</code> package and specify it in the function arguments.</p>
+</blockquote>
+<p><strong>Step 2: Install Teddy (in Terminal)</strong></p>
+<p>After the dependencies are installed and the preparation step is complete, return to your terminal. Navigate back to the parent directory and install the package:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="bu">cd</span> ../..</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="ex">R</span> CMD INSTALL Teddy</span></code></pre></div>
 <p><em>(Note: If you have already navigated inside the <code>Teddy</code> folder, you should use <code>R CMD INSTALL .</code> instead.)</em></p>
-<p><strong>1.3 Troubleshooting Compilation</strong> If you encounter build errors during compilation, especially after switching machines or modifying source files, consider cleaning previously compiled artifacts before rebuilding:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="bu">cd</span> Teddy/src</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">make</span> clean</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">make</span> <span class="at">-j</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="id_13-troubleshooting-compilation">1.3 Troubleshooting Compilation<a class="anchor" aria-label="anchor" href="#id_13-troubleshooting-compilation"></a>
+</h3>
+<p>If you encounter build errors during compilation, especially after switching machines or modifying source files, consider cleaning previously compiled artifacts before rebuilding:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="bu">cd</span> Teddy/src</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">make</span> clean</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">make</span> <span class="at">-j</span></span></code></pre></div>
+</div>
+</div>
 <div class="section level2">
 <h2 id="id_2-initialization">2. Initialization<a class="anchor" aria-label="anchor" href="#id_2-initialization"></a>
 </h2>
-<p><code>{r init, warning=FALSE, eval=FALSE,message=FALSE} library(Teddy)</code></p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">Teddy</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="id_3-identify-chimeric-transcripts">3. Identify chimeric transcripts<a class="anchor" aria-label="anchor" href="#id_3-identify-chimeric-transcripts"></a>
 </h2>
-<p><strong>3.1 Assemble reads into transcripts by Stringtie</strong> <code>{r assemble, warning=FALSE, eval=FALSE, message=FALSE} Teddy::stringtieAssembly(bam = bam, reference = reference, outfile = outfile)</code></p>
-<p><strong>3.2 Merge various GTF files among different samples for a unified newly assembled reference</strong> <code>{r merge, warning=FALSE, eval=FALSE, message=FALSE} Teddy::stringtieMerge(reference = reference, gtfFiles = gtfFiles, outfile = N_reference)</code></p>
-<p><strong>3.3 Annotate the newly assembled reference via the genome reference</strong> <code>{r anno, warning=FALSE, eval=FALSE, message=FALSE} Teddy::gffcompareAnno(reference = reference, gtfFile = N_reference, outfile = annoGTF)</code></p>
-<p><strong>3.4 Flatten the transcripts into counting bins and annotate them via the annotated TE reference as a GRanges obejct</strong> <code>{r repeats, warning=FALSE, eval=FALSE, message=FALSE} anno &lt;- Teddy::prepareAnno(gtffile = N_reference, transposon = transposon)</code></p>
-<p><strong>3.5 Count the reads falling into the counting bins among bam files</strong> <code>{r count, warning=FALSE, eval=FALSE, message=FALSE} se &lt;- countAnno(annotation = anno, bamfiles = bamfile, nthreads = 5)</code></p>
-<p><strong>3.6 Count the reads falling into the transcripts among bam files</strong> <code>{r count2, warning=FALSE, eval=FALSE, message=FALSE} combineSE &lt;- stringtieCombine(reference = N_reference,                                bamfile = bamfiles,                               params = "-p 70",                                gtfFiles = gtfFiles)</code></p>
-<p><strong>3.7 Detect to what extent TE-chimeric exon affect the expression of the corresponding transcript</strong></p>
-<p>3.7.1 Fit the counts with the formula ~sample + TE-chimeric + condition:TE-chimeric and compare it to the null model ~ sample + TE-chimeric. TE-chimeric is a factor with two levels, which classified the exon as TE-chimeric exon or other exon. Compare the deviances of two GLM fits for each counting bin through χ2-distribution test and extract the result from the test . <code>{r test, warning=FALSE, eval=FALSE, message=FALSE} chi_test &lt;- ChimericDrivenTest(SEobject = se, condition = condition) results &lt;- extractTest(object = chi_test)</code></p>
-<p>3.7.2 Estimate relative fold changes of counts in the TE-chimeric exon among different conditions and versus other exons, calculated by a GLM fit based on the formula count ~ condition + TE-chimeric + condition:TE-chimeric. The interaction coefficient reflects that the fraction of the gene’s reads of TE-chimeric exon differs significantly between the different experimental conditions. That is, TE-chimeric transcripts may play a role under different biological conditions. <code>{r foldchange, warning=FALSE, eval=FALSE, message=FALSE} calculateFoldchange(object = chi_test, genes = genes, crossVar="condition")</code></p>
-<p><strong>3.8 Visualize Form and Expression Fluctuation of TE-chimeric Transcripts</strong></p>
-<p>3.8.1 To investigate the structural form and expression changes of TE-chimeric transcripts, TEDDY includes the formPlot function. This tool is designed to visualize how transposable elements (TEs) integrate within specific transcripts. <code>{r vis1, warning=FALSE, eval=FALSE, message=FALSE} formPlot(GTF = GTF, txid = txid, rank = 1,geneName = geneName,TEname = TEname)</code> 3.8.2 Plotting Gene Body and Specific Isoform Structure and Expression To visualize the structure of a gene body and the expression of a specific isoform, particularly showcasing the results of the previously mentioned <code>ChimericDrivenTest</code>, the <code>diffBinPlot</code> function is developed. This function generates a plot that highlights the gene body and isoform structure against the backdrop of expression levels, effectively visualizing the impact of TE-chimeric events on the expression. <code>{r vis2, warning=FALSE, eval=FALSE, message=FALSE} diffBinPlot(count = count, conditions = condition, annotation = anno,             idx = geneIndex,              gtf = N_reference,             txid = txid,             chi_test = chi_test)</code></p>
-<p><strong>3.9 Search the motif binding sites of TE-chimeric transcripts</strong></p>
+<div class="section level3">
+<h3 id="id_31-assemble-reads-into-transcripts-by-stringtie">3.1 Assemble reads into transcripts by Stringtie<a class="anchor" aria-label="anchor" href="#id_31-assemble-reads-into-transcripts-by-stringtie"></a>
+</h3>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">Teddy</span><span class="fu">::</span><span class="fu"><a href="reference/stringtieAssembly.html">stringtieAssembly</a></span><span class="op">(</span>bam <span class="op">=</span> <span class="va">bam</span>, reference <span class="op">=</span> <span class="va">reference</span>, outfile <span class="op">=</span> <span class="va">outfile</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="id_32-merge-various-gtf-files-among-different-samples-for-a-unified-newly-assembled-reference">3.2 Merge various GTF files among different samples for a unified newly assembled reference<a class="anchor" aria-label="anchor" href="#id_32-merge-various-gtf-files-among-different-samples-for-a-unified-newly-assembled-reference"></a>
+</h3>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">Teddy</span><span class="fu">::</span><span class="fu"><a href="reference/stringtieMerge.html">stringtieMerge</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">reference</span>, gtfFiles <span class="op">=</span> <span class="va">gtfFiles</span>, outfile <span class="op">=</span> <span class="va">N_reference</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="id_33-annotate-the-newly-assembled-reference-via-the-genome-reference">3.3 Annotate the newly assembled reference via the genome reference<a class="anchor" aria-label="anchor" href="#id_33-annotate-the-newly-assembled-reference-via-the-genome-reference"></a>
+</h3>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">Teddy</span><span class="fu">::</span><span class="fu"><a href="reference/gffcompareAnno.html">gffcompareAnno</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">reference</span>, gtfFile <span class="op">=</span> <span class="va">N_reference</span>, outfile <span class="op">=</span> <span class="va">annoGTF</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="id_34-flatten-the-transcripts-into-counting-bins-and-annotate-them-via-the-annotated-te-reference-as-a-granges-obejct">3.4 Flatten the transcripts into counting bins and annotate them via the annotated TE reference as a GRanges obejct<a class="anchor" aria-label="anchor" href="#id_34-flatten-the-transcripts-into-counting-bins-and-annotate-them-via-the-annotated-te-reference-as-a-granges-obejct"></a>
+</h3>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">anno</span> <span class="op">&lt;-</span> <span class="fu">Teddy</span><span class="fu">::</span><span class="fu"><a href="reference/prepareAnno.html">prepareAnno</a></span><span class="op">(</span>gtffile <span class="op">=</span> <span class="va">N_reference</span>, transposon <span class="op">=</span> <span class="va">transposon</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="id_35-count-the-reads-falling-into-the-counting-bins-among-bam-files">3.5 Count the reads falling into the counting bins among bam files<a class="anchor" aria-label="anchor" href="#id_35-count-the-reads-falling-into-the-counting-bins-among-bam-files"></a>
+</h3>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/countAnno.html">countAnno</a></span><span class="op">(</span>annotation <span class="op">=</span> <span class="va">anno</span>, bamfiles <span class="op">=</span> <span class="va">bamfile</span>, nthreads <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="id_36-count-the-reads-falling-into-the-transcripts-among-bam-files">3.6 Count the reads falling into the transcripts among bam files<a class="anchor" aria-label="anchor" href="#id_36-count-the-reads-falling-into-the-transcripts-among-bam-files"></a>
+</h3>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">combineSE</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/stringtieCombine.html">stringtieCombine</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">N_reference</span>, </span>
+<span>                              bamfile <span class="op">=</span> <span class="va">bamfiles</span>,</span>
+<span>                              params <span class="op">=</span> <span class="st">"-p 70"</span>, </span>
+<span>                              gtfFiles <span class="op">=</span> <span class="va">gtfFiles</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="id_37-detect-to-what-extent-te-chimeric-exon-affect-the-expression-of-the-corresponding-transcript">3.7 Detect to what extent TE-chimeric exon affect the expression of the corresponding transcript<a class="anchor" aria-label="anchor" href="#id_37-detect-to-what-extent-te-chimeric-exon-affect-the-expression-of-the-corresponding-transcript"></a>
+</h3>
+<p><strong>3.7.1</strong> Fit the counts with the formula <code>~sample + TE-chimeric + condition:TE-chimeric</code> and compare it to the null model <code>~ sample + TE-chimeric</code>. TE-chimeric is a factor with two levels, which classified the exon as TE-chimeric exon or other exon. Compare the deviances of two GLM fits for each counting bin through χ2-distribution test and extract the result from the test.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">chi_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ChimericDrivenTest.html">ChimericDrivenTest</a></span><span class="op">(</span>SEobject <span class="op">=</span> <span class="va">se</span>, condition <span class="op">=</span> <span class="va">condition</span><span class="op">)</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/extractTest.html">extractTest</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">chi_test</span><span class="op">)</span></span></code></pre></div>
+<p><strong>3.7.2</strong> Estimate relative fold changes of counts in the TE-chimeric exon among different conditions and versus other exons, calculated by a GLM fit based on the formula <code>count ~ condition + TE-chimeric + condition:TE-chimeric</code>. The interaction coefficient reflects that the fraction of the gene’s reads of TE-chimeric exon differs significantly between the different experimental conditions. That is, TE-chimeric transcripts may play a role under different biological conditions.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/calculateFoldchange.html">calculateFoldchange</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">chi_test</span>, genes <span class="op">=</span> <span class="va">genes</span>, crossVar<span class="op">=</span><span class="st">"condition"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="id_38-visualize-form-and-expression-fluctuation-of-te-chimeric-transcripts">3.8 Visualize Form and Expression Fluctuation of TE-chimeric Transcripts<a class="anchor" aria-label="anchor" href="#id_38-visualize-form-and-expression-fluctuation-of-te-chimeric-transcripts"></a>
+</h3>
+<p><strong>3.8.1</strong> To investigate the structural form and expression changes of TE-chimeric transcripts, TEDDY includes the <code>formPlot</code> function. This tool is designed to visualize how transposable elements (TEs) integrate within specific transcripts.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/formPlot.html">formPlot</a></span><span class="op">(</span>GTF <span class="op">=</span> <span class="va">GTF</span>, txid <span class="op">=</span> <span class="va">txid</span>, rank <span class="op">=</span> <span class="fl">1</span>, geneName <span class="op">=</span> <span class="va">geneName</span>, TEname <span class="op">=</span> <span class="va">TEname</span><span class="op">)</span></span></code></pre></div>
+<p><strong>3.8.2 Plotting Gene Body and Specific Isoform Structure and Expression</strong> To visualize the structure of a gene body and the expression of a specific isoform, particularly showcasing the results of the previously mentioned <code>ChimericDrivenTest</code>, the <code>diffBinPlot</code> function is developed. This function generates a plot that highlights the gene body and isoform structure against the backdrop of expression levels, effectively visualizing the impact of TE-chimeric events on the expression.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/diffBinPlot.html">diffBinPlot</a></span><span class="op">(</span>count <span class="op">=</span> <span class="va">count</span>, conditions <span class="op">=</span> <span class="va">condition</span>, annotation <span class="op">=</span> <span class="va">anno</span>,</span>
+<span>            idx <span class="op">=</span> <span class="va">geneIndex</span>, </span>
+<span>            gtf <span class="op">=</span> <span class="va">N_reference</span>,</span>
+<span>            txid <span class="op">=</span> <span class="va">txid</span>,</span>
+<span>            chi_test <span class="op">=</span> <span class="va">chi_test</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="id_39-search-the-motif-binding-sites-of-te-chimeric-transcripts">3.9 Search the motif binding sites of TE-chimeric transcripts<a class="anchor" aria-label="anchor" href="#id_39-search-the-motif-binding-sites-of-te-chimeric-transcripts"></a>
+</h3>
 <p>TEDDY enables the identification of motif binding sites within TE-chimeric transcripts, leveraging the <code>pcmFunction</code> to convert motifs of interest from probability matrix (PCM) to position weight matrix (PWM) format. This PWM can then be used as an input for motif search. By applying various thresholds for filtering and integrating other epigenetic data, users can construct potential motif networks that offer insights into the regulatory mechanisms of TE-chimeric transcripts.</p>
 <p>To perform motif search on TE-chimeric transcripts, the <code>MotifSearch</code> function can be utilized as follows:</p>
-<p><code>{r motif, warning=FALSE, eval=FALSE, message=FALSE} MotifSearch(object = object, te = te, pwm = pwm, filter = filter, min.score = min.score)</code></p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/MotifSearch.html">MotifSearch</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">object</span>, te <span class="op">=</span> <span class="va">te</span>, pwm <span class="op">=</span> <span class="va">pwm</span>, filter <span class="op">=</span> <span class="va">filter</span>, min.score <span class="op">=</span> <span class="va">min.score</span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="teddy-outputs-at-a-glance">Teddy outputs at a glance<a class="anchor" aria-label="anchor" href="#teddy-outputs-at-a-glance"></a>
@@ -157,19 +218,19 @@ R CMD INSTALL Teddy</code></pre>
 <td>
 <code><a href="reference/stringtieMerge.html">stringtieMerge()</a></code><br><br><br><code><a href="reference/gffcompareAnno.html">gffcompareAnno()</a></code><br><br><br><code><a href="reference/prepareAnno.html">prepareAnno()</a></code>
 </td>
-<td>Per-sample GTF(optional reference); <br><br>Reference GTF+merged GTF<br><br>Annotated  GTF + TE annotation (GRanges)</td>
-<td> Unified transcript reference <br><br><br>Annotated transcript reference<br><br><br>Flattened exond binsd withd TEd labels</td>
+<td>Per-sample GTF(optional reference); <br><br>Reference GTF+merged GTF<br><br>Annotated GTF + TE annotation (GRanges)</td>
+<td>Unified transcript reference <br><br><br>Annotated transcript reference<br><br><br>Flattened exond binsd withd TEd labels</td>
 <td>Merged GTF<br><br><br>Annotated merged GTF<br><br><br>GRanges object</td>
-<td>Provide unified reference<br><br><br>Label known vs novel isoforms<br><br><br>Enable exon -level counting </td>
-<td>Ensure consistent chromosome naming <br><br><br>Preserve <code>transcript_id</code> / <code>gene_id</code><br><br><br>Match <code>seqlevelsStyle</code> with BAM &amp; TE</td>
+<td>Provide unified reference<br><br><br>Label known vs novel isoforms<br><br><br>Enable exon -level counting</td>
+<td>Ensure consistent chromosome naming <br><br><br>Preserve <code>transcript_id</code> / <code>gene_id</code><br><br><br>Match <code>seqlevelsStyle</code> with BAM &amp; TE</td>
 </tr>
 <tr class="even">
 <td><strong>B. <br>Exon-level counts</strong></td>
 <td><code><a href="reference/countAnno.html">countAnno()</a></code></td>
-<td> Flattened annotation  + BAM files</td>
-<td> Exon-bin × sample  count matrix</td>
-<td> SummarizedExperiment object </td>
-<td>Exon-level QC and downstream analyses</td>
+<td>Flattened annotation + BAM files</td>
+<td>Exon-bin × sample count matrix</td>
+<td>SummarizedExperiment object</td>
+<td>Exon-level QC and downstream analyses</td>
 <td>Use correct <code>isLongRead</code> / <code>isPairedEnd</code> by platform</td>
 </tr>
 <tr class="odd">
@@ -177,8 +238,8 @@ R CMD INSTALL Teddy</code></pre>
 <td><code><a href="reference/stringtieCombine.html">stringtieCombine()</a></code></td>
 <td>Annotated merged GTF + BAM files； +Per-sample GTFs</td>
 <td>Transcript-level abundance estimates + full GTF</td>
-<td>SummarizedExperiment object</td>
-<td>Cross-platform expression &amp; structure analysis</td>
+<td>SummarizedExperiment object</td>
+<td>Cross-platform expression &amp; structure analysis</td>
 <td>Use <code>longRead=TRUE</code> for ONT/PacBio; ensure rownames = <code>transcript_id</code>
 </td>
 </tr>
@@ -187,10 +248,14 @@ R CMD INSTALL Teddy</code></pre>
 </div>
 </div>
 
-  </div>
+  </main><aside class="col-md-3"><div class="links">
+<h2 data-toc-skip>Links</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/YeehanXiao/Teddy/" class="external-link">Browse source code</a></li>
+</ul>
+</div>
 
-  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-    <div class="license">
+<div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li><a href="https://www.r-project.org/Licenses/GPL-3" class="external-link">GPL-3</a></li>
@@ -214,23 +279,20 @@ R CMD INSTALL Teddy</code></pre>
 
 
 
-  </div>
+  </aside>
 </div>
 
 
-      <footer><div class="copyright">
-  <p></p>
-<p>Developed by Yihan Xiao.</p>
+    <footer><div class="pkgdown-footer-left">
+  <p>Developed by Yihan Xiao.</p>
 </div>
 
-<div class="pkgdown">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+<div class="pkgdown-footer-right">
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
-      </footer>
+    </footer>
 </div>
-
 
 
 

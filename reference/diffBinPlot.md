@@ -1,0 +1,68 @@
+# Plot the gene model in the control and reference groups
+
+Plot the gene model in the control and reference groups
+
+## Usage
+
+``` r
+diffBinPlot(
+  count,
+  conditions,
+  annotation,
+  idx,
+  labels,
+  Title,
+  gtf,
+  txid,
+  chi_test,
+  gene_name,
+  ...
+)
+```
+
+## Arguments
+
+- count:
+
+  A data matrix of bin-based counts，extracted from the output of
+  countAnno[`countAnno`](https://yeehanxiao.github.io/Teddy/reference/countAnno.md)
+
+- conditions:
+
+  A factor vector indicating the conditions (e.g., control and
+  reference) of each sample
+
+- annotation:
+
+  A Granges object for annotated transcripts
+
+- idx:
+
+  The index of the gene.
+
+- labels:
+
+  A character vector, containing labels for the control and reference
+  groups.
+
+- Title:
+
+  The title of plot, e.g., gene name.
+
+- gtf:
+
+  The dir for merged GTF file as the output of
+  [`gffcompareAnno`](https://yeehanxiao.github.io/Teddy/reference/gffcompareAnno.md)
+
+- txid:
+
+  The transcript id of a specific transcript for the gene
+
+- chi_test:
+
+  DESeq2 object. The output from the ChimericDrivenTest, extracted by
+  [`extractTest`](https://yeehanxiao.github.io/Teddy/reference/extractTest.md)
+
+- gene_name:
+
+  The gene name.
