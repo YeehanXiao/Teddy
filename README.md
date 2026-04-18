@@ -6,29 +6,64 @@ author: Yihan Xiao
 
 
 # **TEDDY**
-# **T**ransposable **e**lement **d**e novo insertion **detecting** and chimeric transcripts identif**y**ing
-**TEDDY** is a framework for TE insertion detection and chimeric transcripts identification.
+# **T**ransposable **E**lement-**D**epen**D**ent isoform anal**Y**sis framework
 <p align="center">
 <img src="./images/workflow.png"/>
 </p>
 
 
-## 1.Getting Started
+## 1. Getting Started
+
 **1.1 Preparation**
+
 To compile Teddy and all dependencies:
-```{shell prepare2, warning=FALSE, eval=FALSE,message=FALSE}
+
+```{shell prepare2, warning=FALSE, eval=FALSE, message=FALSE}
 cd Teddy
 cd src && make -j
 ```
+
 All required libraries (libdeflate, xz, bzip2) are included under `src/deps`, and will be compiled automatically.
 
 **1.2 Installation**
-```{shell install, warning=FALSE, eval=FALSE,message=FALSE}
+
+Since `Teddy` relies on several bioinformatics packages from Bioconductor, you need to install these dependencies first before installing the `Teddy` package itself.
+
+**Step 1: Install Dependencies (in R console)**
+
+Please open your R console and run the following commands to ensure all required packages are installed:
+
+```{r install_deps, warning=FALSE, eval=FALSE, message=FALSE}
+# Install BiocManager if not already installed
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+# Install required dependencies from Bioconductor
+BiocManager::install(c(
+  "rtracklayer", "GenomicFeatures", "Rsamtools", 
+  "GenomicAlignments", "GenomicRanges", "IRanges", 
+  "S4Vectors", "SummarizedExperiment", "Rsubread", 
+  "DESeq2", "statmod", "BiocParallel", "MatrixGenerics"
+))
+
+# Install the default mouse genome package used by Teddy
+BiocManager::install("BSgenome.Mmusculus.UCSC.mm10")
+```
+
+> **Note on Reference Genomes:** `Teddy` uses the mouse genome (`mm10`) as the default parameter in some functions. If you are working with other species (e.g., Human `hg38`), you will need to install the corresponding `BSgenome` package and specify it in the function arguments.
+
+**Step 2: Install Teddy (in Terminal)**
+
+After the dependencies are installed and the preparation step is complete, return to your terminal. Navigate back to the parent directory and install the package:
+
+```{shell install_teddy, warning=FALSE, eval=FALSE, message=FALSE}
 cd ../..
 R CMD INSTALL Teddy
 ```
-Note
 
+*(Note: If you have already navigated inside the `Teddy` folder, you should use `R CMD INSTALL .` instead.)*
+
+**1.3 Troubleshooting Compilation**
 If you encounter build errors during compilation, especially after switching machines or modifying source files, consider cleaning previously compiled artifacts before rebuilding:
 
 ```bash

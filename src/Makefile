@@ -9,6 +9,7 @@ deps:
 	cd ./deps/htslib && make libhts.a
 
 tools: tools-old tools-new
+tools: tools-old tools-new gffcompare
 
 tools-old:
 	cd ./stringtie && make release \
@@ -20,8 +21,12 @@ tools-new:
 	LIBS="../deps/htslib/libhts.a ../deps/libdeflate/build/libdeflate.a ../deps/xz/install/lib/liblzma.a ../deps/bzip2/libbz2.a -lz -llzma -lbz2 -pthread" \
 	CFLAGS="-I../deps/htslib -I../deps/libdeflate -I../deps/xz/install/include -I../deps/bzip2"
 
+gffcompare:
+	cd ./gffcompare && make
+
 clean:
 	cd deps/libdeflate/build && make clean || true
 	cd deps/xz && make clean || true
 	cd deps/bzip2 && make clean || true
 	cd stringtie && make clean || true
+	cd gffcompare && make clean || true

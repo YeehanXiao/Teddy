@@ -30,8 +30,8 @@ Kernel configured for up to 12 processors.
 Processor type: arm64e (ARM64E)
 Processors active: 0 1 2 3 4 5 6 7 8 9 10 11
 Primary memory available: 24.00 gigabytes
-Default processor set: 591 tasks, 5146 threads, 12 processors
-Load average: 5.47, Mach factor: 7.05
+Default processor set: 738 tasks, 5657 threads, 12 processors
+Load average: 3.88, Mach factor: 8.23
 /bin/machine           = unknown
 /usr/bin/oslevel       = unknown
 /bin/universe          = unknown
@@ -624,7 +624,7 @@ configure:8274: checking for pthread_condattr_setclock
 configure:8274: gcc -o conftest -g -O2 -pthread -I/opt/homebrew/opt/llvm/include -L/opt/homebrew/opt/llvm/lib conftest.c  -lpthread >&5
 Undefined symbols for architecture arm64:
   "_pthread_condattr_setclock", referenced from:
-      _main in conftest-83d45a.o
+      _main in conftest-877eb9.o
 ld: symbol(s) not found for architecture arm64
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 configure:8274: $? = 1
@@ -1050,11 +1050,11 @@ configure:18546: checking for iconv
 configure:18571: gcc -o conftest -g -O2 -I/opt/homebrew/opt/llvm/include -L/opt/homebrew/opt/llvm/lib conftest.c  -lpthread >&5
 Undefined symbols for architecture arm64:
   "_iconv", referenced from:
-      _main in conftest-35c0cf.o
+      _main in conftest-716121.o
   "_iconv_close", referenced from:
-      _main in conftest-35c0cf.o
+      _main in conftest-716121.o
   "_iconv_open", referenced from:
-      _main in conftest-35c0cf.o
+      _main in conftest-716121.o
 ld: symbol(s) not found for architecture arm64
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 configure:18571: $? = 1
@@ -3573,7 +3573,7 @@ configure:20444: checking for posix_fadvise
 configure:20444: gcc -o conftest -g -O2 -I/opt/homebrew/opt/llvm/include -L/opt/homebrew/opt/llvm/lib conftest.c  -lpthread >&5
 Undefined symbols for architecture arm64:
   "_posix_fadvise", referenced from:
-      _main in conftest-862496.o
+      _main in conftest-1889e8.o
 ld: symbol(s) not found for architecture arm64
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 configure:20444: $? = 1
@@ -5048,7 +5048,7 @@ configure:21726: checking for pledge
 configure:21726: gcc -o conftest -g -O2 -I/opt/homebrew/opt/llvm/include -L/opt/homebrew/opt/llvm/lib conftest.c  -lpthread >&5
 Undefined symbols for architecture arm64:
   "_pledge", referenced from:
-      _main in conftest-f4815a.o
+      _main in conftest-a08c17.o
 ld: symbol(s) not found for architecture arm64
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 configure:21726: $? = 1
@@ -5927,6 +5927,7 @@ config.status:1389: creating src/scripts/xzgrep
 config.status:1389: creating src/scripts/xzmore
 config.status:1389: creating src/scripts/xzless
 config.status:1389: creating config.h
+config.status:1570: config.h is unchanged
 config.status:1618: executing depfiles commands
 config.status:1695: cd lib       && sed -e '/# am--include-marker/d' Makefile         | make -f - am--depfiles
 make[1]: Nothing to be done for `am--depfiles'.
