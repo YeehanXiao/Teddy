@@ -4,7 +4,7 @@ HTSLIB  := ../deps/htslib
 HTSLIB := ../deps/htslib
 LIBDEFLATE := ../deps/libdeflate/build/libdeflate.a
 LIBBZ2 := ../deps/bzip2/libbz2.a
-LIBLZMA := ../deps/xz/cmake-build/install/lib/liblzma.a
+LIBLZMA := ../install/lib/liblzma.a
 
 GDIR := ./gclib
 #--

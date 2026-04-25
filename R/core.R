@@ -47,40 +47,142 @@ stringtieAssembly <- function(bam, reference = NULL, outfile, params = "", longR
 #' @param params Other parameters
 #' @export
 stringtieMerge <- function(reference, gtfFiles, outfile, params = "") {
+  if (!all(file.exists(gtfFiles))) {
+    stop("Some GTF files do not exist.")
+  }
+  
+  outdir <- dirname(outfile)
+  if (!dir.exists(outdir)) {
+    dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
+  }
+  
+  if (file.exists(outfile)) {
+    warning("Existing outfile will be overwritten: ", outfile)
+    unlink(outfile)
+  }
+  
+  before <- list.files(outdir, pattern = "\\.gtf$", full.names = TRUE)
+  
   programtags <- "--merge"
   reference <- paste("-G", reference, sep = " ")
   gtffile <- paste(gtfFiles, collapse = " ")
-  outfile <- paste("-o", outfile, sep = " ")
-  cmd <- sprintf("%s %s %s %s %s",
-                 programtags,
-                 reference,
-                 gtffile,
-                 outfile,
-                 params)
-  return(invisible(lapply(cmd, .Stringtiebin)))
+  outfile_arg <- paste("-o", outfile, sep = " ")
+  cmd <- sprintf("%s %s %s %s %s", programtags, reference, gtffile, outfile_arg, params)
+  
+  rc <- .Stringtiebin(cmd)
+  
+  if (!file.exists(outfile)) {
+    after <- list.files(outdir, pattern = "\\.gtf$", full.names = TRUE)
+    new_gtf <- setdiff(after, before)
+    
+    if (length(new_gtf) >= 1) {
+      newest <- new_gtf[which.max(file.info(new_gtf)$mtime)]
+      ok <- file.rename(newest, outfile)
+      
+      if (!ok || !file.exists(outfile)) {
+        stop("Failed to rename merged GTF to expected outfile: ", outfile)
+      }
+    } else {
+      stop("Expected merged GTF not found: ", outfile)
+    }
+  }
+  
+  invisible(rc)
+}
+gffcompareAnno <- function(reference, gtffile, outfile, params = "",
+                           cleanup = TRUE, overwrite = FALSE) {
+  if (!all(file.exists(gtffile))) {
+    stop("Some GTF files do not exist.")
+  }
+  
+  outdir <- dirname(outfile)
+  if (!dir.exists(outdir)) {
+    dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
+  }
+  
+  outbase <- tools::file_path_sans_ext(basename(outfile))
+  final_prefix <- file.path(outdir, outbase)
+  
+  final_files <- c(
+    outfile,
+    paste0(final_prefix, ".tracking"),
+    paste0(final_prefix, ".loci"),
+    final_prefix
+  )
+  
+  existing <- final_files[file.exists(final_files)]
+  if (length(existing) > 0 && !overwrite) {
+    stop(
+      "Output file(s) already exist: ",
+      paste(existing, collapse = ", "),
+      "\nSet overwrite = TRUE to replace them."
+    )
+  }
+  if (length(existing) > 0 && overwrite) {
+    unlink(existing)
+  }
+  
+  tmp_prefix <- file.path(
+    outdir,
+    paste0(".gffcompare_tmp_", Sys.getpid(), "_", outbase)
+  )
+  
+  reference_arg <- paste("-r", reference)
+  outfile_arg <- paste("-o", tmp_prefix)
+  gtffile_arg <- paste(gtffile, collapse = " ")
+  
+  cmd <- sprintf(
+    "%s %s %s %s",
+    reference_arg,
+    outfile_arg,
+    gtffile_arg,
+    params
+  )
+  
+  rc <- invisible(lapply(cmd, .gffcompareBin))
+  
+  tmp_annotated <- paste0(tmp_prefix, ".annotated.gtf")
+  tmp_tracking  <- paste0(tmp_prefix, ".tracking")
+  tmp_loci      <- paste0(tmp_prefix, ".loci")
+  tmp_summary   <- tmp_prefix
+  
+  if (!file.exists(tmp_annotated)) {
+    stop("Expected annotated GTF was not generated: ", tmp_annotated)
+  }
+  
+  file.rename(tmp_annotated, outfile)
+  
+  if (file.exists(tmp_tracking)) {
+    file.rename(tmp_tracking, paste0(final_prefix, ".tracking"))
+  }
+  
+  if (file.exists(tmp_loci)) {
+    file.rename(tmp_loci, paste0(final_prefix, ".loci"))
+  }
+  
+  if (file.exists(tmp_summary)) {
+    file.rename(tmp_summary, final_prefix)
+  }
+  
+  if (cleanup) {
+    tmp_files <- list.files(
+      outdir,
+      pattern = paste0("^", basename(tmp_prefix)),
+      full.names = TRUE
+    )
+    
+    remove_files <- tmp_files[
+      grepl("\\.(tmap|refmap)$", tmp_files)
+    ]
+    
+    if (length(remove_files) > 0) {
+      unlink(remove_files)
+    }
+  }
+  
+  invisible(rc)
 }
 
-#' @title R wrapper to Run gffcompare
-#' @description The function to compare and merge accuracy of one or more GFF files (the “query” files),
-#' when compared with a reference annotation (also provided as GFF).
-#' @param reference Use a reference annotation file to guide compare assembly process.
-#' @param gtffile GTF files with gffcompare annotation transcripts.
-#' @param outfile The name of the output annotated merged GTF.
-#' @param params Other parameters
-#' @export
-
-gffcompareAnno <- function(reference, gtffile, outfile, params = "") {
-  reference <- paste("-r", reference, sep = " ")
-  outfile <- gsub(pattern = "[.]gtf$", replacement = "", x = outfile)
-  gtffile <- paste(gtffile, collapse = " ")
-  outfile <- paste("-o", outfile, sep = " ")
-  cmd <- sprintf("%s %s %s %s",
-                 reference,
-                 outfile,
-                 gtffile,
-                 params)
-  return(invisible(lapply(cmd, .gffcompareBin)))
-}
 
 #' @title Preparing the genome annotation object
 #' @description Flatten exon appearing multiple times among different transcripts in GTF file

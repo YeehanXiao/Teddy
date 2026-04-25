@@ -1,21 +1,36 @@
-url: https://yeehanxiao.github.io/Teddy/
+url: https://yeehanxiao.github.io/Teddy
+
 template:
   bootstrap: 5
-navbar:
-  structure:
-    left: [home, tutorials, reference]
-    right: [github]
-  components:
-    tutorials:
-      text: Tutorials
+
+home:
+  title: TEDDY
+  description: TE-dependent / TE-chimeric transcript analysis framework
+
 reference:
-  - title: "Core Pipeline"
+  - title: Core workflow
     contents:
       - stringtieAssembly
       - stringtieMerge
-      - stringtieCombine
-  - title: "Annotation & Counting"
-    contents:
       - gffcompareAnno
       - prepareAnno
       - countAnno
+      - stringtieCombine
+
+  - title: Downstream analysis
+    contents:
+      - ChimericDrivenTest
+      - calculateFoldchange
+      - extractTest
+      - MotifSearch
+
+  - title: Visualisation
+    contents:
+      - diffBinPlot
+      - formPlot
+
+  - title: Utilities
+    contents:
+      - extractGTF
+      - pcmFunction
+      - processGTF

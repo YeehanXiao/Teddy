@@ -1,0 +1,19 @@
+---
+title: "Short-read Analysis: Illumina TE-Chimeric Discovery"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Short-read Analysis: Illumina TE-Chimeric Discovery}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(Teddy)
+```

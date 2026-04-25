@@ -22,7 +22,7 @@ srcdir = .
 top_srcdir = ..
 
 
-prefix = /Users/xiaoyihan/Core/MyTools/Develop_Final/Teddy/src/deps/xz/install
+prefix = /Users/xiaoyihan/Core/MyTools/Develop_Final/Teddy/src/install
 exec_prefix = ${prefix}
 datarootdir = ${prefix}/share
 datadir = ${datarootdir}

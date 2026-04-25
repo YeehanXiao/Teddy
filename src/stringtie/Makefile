@@ -4,7 +4,7 @@ GDIR = ./gclib
 #--
 LIBDEFLATE := ../deps/libdeflate/build/libdeflate.a
 LIBBZ2 := ../deps/bzip2/libbz2.a
-LIBLZMA := ../deps/xz/install/lib/liblzma.a
+LIBLZMA := ../install/lib/liblzma.a
 
 INCDIRS := -I. -I${GDIR} -I ../deps/htslib
 
@@ -31,7 +31,7 @@ LDFLAGS := $(if $(LDFLAGS),$(LDFLAGS),-g)
 LIBS := ../deps/htslib/libhts.a \
         ../deps/libdeflate/build/libdeflate.a \
         -lz -llzma -lbz2 -lm -pthread \
-        ../deps/xz/install/lib/liblzma.a \
+        ../install/lib/liblzma.a \
         ../deps/bzip2/libbz2.a
 
 
