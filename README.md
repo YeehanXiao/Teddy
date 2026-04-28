@@ -1,9 +1,9 @@
+# TEDDY
 
-# **TEDDY**
-# **T**ransposable **E**lement-**D**epen**D**ent isoform anal**Y**sis framework
+## **T**ransposable **E**lement-**D**epen**D**ent isoform anal**Y**sis framework
 
 <p align="center">
-<img src="./images/workflow.png"/>
+  <img src="man/figures/workflow.png" alt="Overview of the TEDDY workflow" />
 </p>
 
 ## 1. Getting Started

@@ -1,3 +1,61 @@
+#' Standardize transposon annotations for TEDDY
+#'
+#' This helper prepares a transposon annotation object for TEDDY by converting
+#' chromosome naming to NCBI style and ensuring that a TE-name metadata column
+#' named `names` is available. If `names` is absent, common TE-name columns such
+#' as `name`, `repName`, `repname`, or `TE_name` are used to create it.
+#'
+#' @param transposon A \link[GenomicRanges:GRanges-class]{GRanges} object
+#'   containing transposon annotations.
+#' @param replace_name Logical. If `TRUE` and the object contains a `name`
+#'   column but not a `names` column, the `name` column is renamed to `names`.
+#'   If `FALSE`, a new `names` column is created while preserving the original
+#'   `name` column. Default is `FALSE`.
+#'
+#' @return A \link[GenomicRanges:GRanges-class]{GRanges} object with NCBI-style
+#'   chromosome names and a character metadata column named `names`.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' transposon <- NCBI_check(transposon)
+#' transposon <- NCBI_check(transposon, replace_name = TRUE)
+#' }
+NCBI_check <- function(transposon, replace_name = FALSE) {
+  if (!inherits(transposon, "GRanges")) {
+    stop("`transposon` must be a GRanges object.")
+  }
+  
+  mcols_names <- colnames(S4Vectors::mcols(transposon))
+  
+  if (!"names" %in% mcols_names) {
+    candidate_cols <- c("name", "repName", "repname", "TE_name")
+    hit <- candidate_cols[candidate_cols %in% mcols_names][1]
+    
+    if (!is.na(hit)) {
+      if (replace_name && hit == "name") {
+        colnames(S4Vectors::mcols(transposon))[
+          colnames(S4Vectors::mcols(transposon)) == "name"
+        ] <- "names"
+      } else {
+        transposon$names <- as.character(S4Vectors::mcols(transposon)[[hit]])
+      }
+    } else {
+      stop("Required TE name column missing. Please provide one of: `names`, `name`, `repName`, `repname`, or `TE_name`.")
+    }
+  } else {
+    transposon$names <- as.character(transposon$names)
+  }
+  
+  GenomeInfoDb::seqlevelsStyle(transposon) <- "NCBI"
+  GenomeInfoDb::seqlevels(transposon) <- sub("^chr", "", GenomeInfoDb::seqlevels(transposon))
+  GenomeInfoDb::seqnames(transposon) <- sub("^chr", "", GenomeInfoDb::seqnames(transposon))
+  
+  transposon
+}
+
+
 .Stringtiebin <- function(args = "") {
   if (is.null(args) || args == "") {
     stop("The StringTie executables require additional arguments.")
@@ -146,4 +204,5 @@ getEffectsForGene <- function(gene,
   coef <- UnfoldCoefs(varlist = varlist, fit = fit, mm = mm, mf = Mf)
   return(coef)
 }
+
 
