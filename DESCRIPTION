@@ -1,7 +1,7 @@
 Package: Teddy
 Type: Package
 Title: Analysis of TE-Dependent Gene Isoforms
-Version: 1.1.0
+Version: 1.1.1
 Author: Yihan Xiao
 Maintainer: Yihan Xiao <1653008@tongji.edu.cn>
 Description: Teddy provides functions for identifying, quantifying,
