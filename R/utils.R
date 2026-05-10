@@ -206,3 +206,44 @@ getEffectsForGene <- function(gene,
 }
 
 
+
+#' Extract GTF Based on Type and FPKM Filter
+#'
+#' This function filters and extracts GTF information from a `SummarizedExperiment` object 
+#' based on the specified element type (exon, transcript, or both) and an FPKM threshold. 
+#' It is designed to work with `SummarizedExperiment` objects containing GTF metadata and FPKM assay data.
+#'
+#' @param combineSE A `SummarizedExperiment` object containing GTF metadata in its `@metadata$gtf` slot
+#' and FPKM values in one of its assays.
+#' @param filter A numeric value specifying the minimum FPKM threshold for transcripts to be included in the output. 
+#' Default is 1.
+#' @param type A character string specifying the type of genetic elements to extract. 
+#' Valid options are "exon", "transcript", or "both". Default is "exon".
+#'
+#' @return A filtered subset of the GTF metadata from the `combineSE` object, 
+#' including only the specified types of genetic elements that meet the FPKM threshold.
+#'
+#' @examples
+#' # Assuming `mySE` is a `SummarizedExperiment` object with the necessary structure
+#' extractGTF(mySE, filter = 1, type = "exon")
+#'
+#' @export
+#'
+extractGTF <- function(combineSE, filter = 1, type = c("exon", "transcript", "both")){
+  if (!inherits(combineSE, "SummarizedExperiment")) {
+    stop("combineSE must be a SummarizedExperiment object")
+  }
+  type <- match.arg(type)
+  Transcript_FPKM_index <- rowSums(assays(combineSE)[["FPKM"]] > filter) >= 1
+  sub_combineSE <- subset(combineSE, subset = Transcript_FPKM_index)
+  GTF <- sub_combineSE@metadata$gtf
+  
+  if (type == "exon") {
+    type_index <- GTF$type == "exon"
+    GTF <- GTF[type_index, ]
+  } else if (type == "transcript") {
+    type_index <- GTF$type == "transcript"
+    GTF <- GTF[type_index, ]
+  }
+}
+
