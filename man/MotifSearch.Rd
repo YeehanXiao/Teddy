@@ -9,7 +9,7 @@ MotifSearch(
   te,
   pwm,
   minoverlap = 15,
-  genome = BSgenome.Mmusculus.UCSC.mm10,
+  genome,
   min.score = 0.9,
   filter = 0
 )

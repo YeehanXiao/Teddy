@@ -4,7 +4,7 @@
 \alias{NCBI_check}
 \title{Standardize transposon annotations for TEDDY}
 \usage{
-NCBI_check(transposon, replace_name = FALSE)
+NCBI_check(transposon, replace_name = FALSE, ncbi_style = TRUE)
 }
 \arguments{
 \item{transposon}{A \link[GenomicRanges:GRanges-class]{GRanges} object
@@ -14,20 +14,18 @@ containing transposon annotations.}
 column but not a `names` column, the `name` column is renamed to `names`.
 If `FALSE`, a new `names` column is created while preserving the original
 `name` column. Default is `FALSE`.}
+
+\item{ncbi_style}{Logical. If `TRUE` (default), chromosome names are converted
+to NCBI style (e.g., '1', '2'). If `FALSE`, they are converted to UCSC style 
+(e.g., 'chr1', 'chr2').}
 }
 \value{
-A \link[GenomicRanges:GRanges-class]{GRanges} object with NCBI-style
+A \link[GenomicRanges:GRanges-class]{GRanges} object with standardized
   chromosome names and a character metadata column named `names`.
 }
 \description{
 This helper prepares a transposon annotation object for TEDDY by converting
-chromosome naming to NCBI style and ensuring that a TE-name metadata column
+chromosome naming to NCBI or UCSC style and ensuring that a TE-name metadata column
 named `names` is available. If `names` is absent, common TE-name columns such
 as `name`, `repName`, `repname`, or `TE_name` are used to create it.
-}
-\examples{
-\dontrun{
-transposon <- NCBI_check(transposon)
-transposon <- NCBI_check(transposon, replace_name = TRUE)
-}
 }

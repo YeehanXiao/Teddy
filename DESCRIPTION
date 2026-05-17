@@ -1,7 +1,7 @@
 Package: Teddy
 Type: Package
 Title: Analysis of TE-Dependent Gene Isoforms
-Version: 1.1.1
+Version: 1.1.6
 Author: Yihan Xiao
 Maintainer: Yihan Xiao <1653008@tongji.edu.cn>
 Description: Teddy provides functions for identifying, quantifying,
@@ -32,6 +32,8 @@ Imports:
 Suggests:
     knitr,
     rmarkdown
-RoxygenNote: 7.3.3
+SystemRequirements: cmake
 URL: https://github.com/YeehanXiao/Teddy, https://yeehanxiao.github.io/Teddy
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0
+RoxygenNote: 8.0.0

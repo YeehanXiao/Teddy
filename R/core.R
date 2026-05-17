@@ -243,6 +243,12 @@ prepareAnno <- function(gtffile, singleGens = TRUE, transposon = NULL, minoverla
     if (!c("names") %in% colnames(S4Vectors::mcols(transposon)) || !is(transposon, "GRanges")) {
       stop("Transposone must be a Granges object that includes a column named 'names'.")
     }
+      target_style <- suppressWarnings(GenomeInfoDb::seqlevelsStyle(exonicParts)[1])
+        is_ncbi_format <- TRUE
+      if (!is.na(target_style) && target_style == "UCSC") {
+        is_ncbi_format <- FALSE
+      }
+    transposon <- NCBI_check(transposon, replace_name = FALSE, ncbi_style = is_ncbi_format)
     overlaps <- IRanges::findOverlaps(query = exonicParts, subject = transposon, 
                                       minoverlap = minoverlap)
     repeats <- split(x = transposon$names[S4Vectors::subjectHits(overlaps)], 
@@ -359,39 +365,6 @@ countAnno <- function(annotation, bamfile,
 }
 
 
-
-#' Extract GTF information
-#'
-#' This function filters and extracts GTF information from a `SummarizedExperiment` object 
-#' based on the specified element type (exon, transcript, or both) and an FPKM threshold. 
-#'
-#' @param combineSE A \code{SummarizedExperiment} object, typically the output from the \code{\link{combineSE}} function.
-#' It should contain GTF metadata in its \code{@metadata$gtf} slot and FPKM values in one of its assays.
-#' @param filter A numeric value specifying the minimum FPKM threshold for transcripts to be included in the output. 
-#' Default is 1.
-#' @param type A character string specifying the type of genetic elements to extract. 
-#' Valid options are "exon", "transcript", or "both". Default is "exon".
-#' @importFrom SummarizedExperiment assays
-#' @importFrom SummarizedExperiment SummarizedExperiment
-#' @return A filtered subset of the GTF metadata from the `combineSE` object, 
-#' including only the specified types of genetic elements that meet the FPKM threshold.
-#' @export
-extractGTF <- function(combineSE, filter = 1, type = c("exon", "transcript", "both")){
-  if (!inherits(combineSE, "SummarizedExperiment")) {
-    stop("combineSE must be a SummarizedExperiment object")
-  }
-  type <- match.arg(type)
-  Transcript_FPKM_index <- rowSums(assays(combineSE)[["FPKM"]] > filter) >= 1
-  sub_combineSE <- subset(combineSE, subset = Transcript_FPKM_index)
-  GTF <- sub_combineSE@metadata$gtf
-  if (type == "exon") {
-    type_index <- GTF$type == "exon"
-    GTF <- GTF[type_index, ]
-  } else if (type == "transcript") {
-    type_index <- GTF$type == "transcript"
-    GTF <- GTF[type_index, ]
-  }
-}
 
 
 
@@ -605,49 +578,95 @@ calculateFoldchange <- function(object,
 #' It can handle both external (local) GTF files and in-memory SummarizedExperiment objects. 
 #' The function extracts exon and transcript information, finds overlaps with TE annotations, and filters out transcripts with zero expression.
 #'
-#' @param gtfFile Character. Path to the GTF file (optional, required if combineSE is NULL).
 #' @param te GRanges object. Transposable element annotations, required for overlap analysis.
 #' The `te` object must contain at least three metadata columns: `names`, `family`, and `class`. 
-#' @param combineSE SummarizedExperiment. Pre-processed RNA-seq quantification object (optional, required if gtfFile is NULL).
-#' @param minoverlap Integer. Minimum required overlap (in base pairs) between GTF exons and TE annotations.
-#' @param threads Integer. Number of threads to use for parallel processing. Default is 4.
+#' @param gtfPath Character. Path to the GTF file (optional, required if combineSE is NULL).
+#' @param combineSE SummarizedExperiment. Pre-processed RNA-seq quantification object (optional, required if gtfPath is NULL).
+#' @param minoverlap Integer. Minimum required overlap (in base pairs) between GTF exons and TE annotations. Default is 0.
+#' @param threads Integer. Number of threads to use for parallel processing. Default is 9.
 #' 
 #' @return A GRanges object with transcripts overlapping TEs, annotated with TE information.
 #' 
 #' @import BiocParallel
 #' @import GenomicRanges
 #' @importFrom rtracklayer import
+#' @importFrom S4Vectors queryHits subjectHits
 #' 
 #' @export
-processGTF <- function(te, gtf_path = NULL, combineSE = NULL, minoverlap = 0,threads = 9) {
+processGTF <- function(te, gtfPath = NULL, combineSE = NULL,
+                       minoverlap = 0, threads = 9) {
   
-  # Load GTF data from either combineSE or GTF path
   if (!is.null(combineSE)) {
-    GTF <- combineSE@metadata$gtf
-  } else if (!is.null(gtf_path)) {
-    #GTF <- readRDS(gtf_path)
-    GTF <- rtracklayer::import(gtf_path)
+    GTF <- S4Vectors::metadata(combineSE)$gtf
+  } else if (!is.null(gtfPath)) {
+    GTF <- rtracklayer::import(gtfPath)
   } else {
-    stop("Please provide either a GTF path or a combineSE object.")
+    stop("Please provide either a gtfPath or a combineSE object.")
   }
   
-  # Filter to include only exons
-  exon_index <- GTF$type == "exon"
-  GTF <- GTF[exon_index, ]
+  if (!inherits(GTF, "GRanges")) {
+    stop("GTF must be a GRanges object.")
+  }
   
-  # Filter out '*' strand
+  gtf_mc <- S4Vectors::mcols(GTF)
+  required_gtf_cols <- c("type", "transcript_id", "exon_number")
+  miss <- setdiff(required_gtf_cols, colnames(gtf_mc))
+  if (length(miss) > 0) {
+    stop("GTF is missing required column(s): ", paste(miss, collapse = ", "))
+  }
+  
+  required_te_cols <- c("names", "family", "class")
+  miss_te <- setdiff(required_te_cols, colnames(S4Vectors::mcols(te)))
+  if (length(miss_te) > 0) {
+    stop("te is missing required column(s): ", paste(miss_te, collapse = ", "))
+  }
+  
+  ## fill exon-level gene_name from transcript rows if needed
+  if ("gene_name" %in% colnames(gtf_mc)) {
+    tx_gene <- as.character(gtf_mc$gene_name[as.character(gtf_mc$type) == "transcript"])
+    names(tx_gene) <- as.character(gtf_mc$transcript_id[as.character(gtf_mc$type) == "transcript"])
+  } else {
+    tx_gene <- character()
+  }
+  
+  ## keep exon rows
+  GTF <- GTF[as.character(gtf_mc$type) == "exon"]
   GTF <- GTF[GenomicRanges::strand(GTF) != "*"]
   
-  # Rank exons based on strand direction
-  t_exonRank <- split(x = GTF$exon_number, f = GTF$transcript_id)
-  t_exonRank <- t_exonRank[unique(GTF$transcript_id)]
+  mc <- S4Vectors::mcols(GTF)
   
-  t_gestrand <- split(x = GenomicRanges::strand(GTF), f = GTF$transcript_id, drop = TRUE)
-  t_gestrand <- t_gestrand[unique(GTF$transcript_id)]
+  if (!"gene_name" %in% colnames(mc)) {
+    mc$gene_name <- NA_character_
+  }
   
-  bp_param <- MulticoreParam(workers = threads)  
+  if (length(tx_gene) > 0) {
+    exon_tx <- as.character(mc$transcript_id)
+    fill_gene <- tx_gene[exon_tx]
+    need_fill <- is.na(mc$gene_name) | mc$gene_name == ""
+    mc$gene_name[need_fill] <- fill_gene[need_fill]
+  }
   
-  exoninTx <- bplapply(names(t_exonRank), function(x) {
+  S4Vectors::mcols(GTF) <- mc
+  
+  mc <- S4Vectors::mcols(GTF)
+  tx_ids <- unique(as.character(mc$transcript_id))
+  
+  t_exonRank <- split(
+    x = as.character(mc$exon_number),
+    f = as.character(mc$transcript_id)
+  )
+  t_exonRank <- t_exonRank[tx_ids]
+  
+  t_gestrand <- split(
+    x = as.character(GenomicRanges::strand(GTF)),
+    f = as.character(mc$transcript_id),
+    drop = TRUE
+  )
+  t_gestrand <- t_gestrand[tx_ids]
+  
+  bp_param <- BiocParallel::MulticoreParam(workers = threads)
+  
+  exoninTx <- BiocParallel::bplapply(names(t_exonRank), function(x) {
     if (unique(as.character(t_gestrand[[x]])) == "-") {
       order(as.integer(t_exonRank[[x]]), decreasing = TRUE)
     } else {
@@ -655,37 +674,115 @@ processGTF <- function(te, gtf_path = NULL, combineSE = NULL, minoverlap = 0,thr
     }
   }, BPPARAM = bp_param)
   
+  names(exoninTx) <- tx_ids
+  S4Vectors::mcols(GTF)$tx_exon_rank <- unlist(
+    exoninTx,
+    recursive = FALSE,
+    use.names = TRUE
+  )
   
+  overlaps <- GenomicRanges::findOverlaps(GTF, te, minoverlap = minoverlap)
   
-  names(exoninTx) <- unique(GTF$transcript_id)
-  GTF$tx_exon_rank <- unlist(exoninTx, recursive = FALSE, use.names = TRUE)
+  if (length(overlaps) == 0) {
+    warning("No overlaps found between GTF exons and TE annotations.")
+    return(GTF[0])
+  }
   
+  class <- split(
+    x = as.character(S4Vectors::mcols(te)$class[S4Vectors::subjectHits(overlaps)]),
+    f = S4Vectors::queryHits(overlaps)
+  )
+  class <- lapply(class, function(x) paste(unique(x), collapse = ","))
   
-  # Find overlaps between GTF and TE
-  overlaps <- findOverlaps(GTF, te, minoverlap = minoverlap)
+  repeats <- split(
+    x = as.character(S4Vectors::mcols(te)$names[S4Vectors::subjectHits(overlaps)]),
+    f = S4Vectors::queryHits(overlaps)
+  )
+  repeats <- lapply(repeats, function(x) paste(unique(x), collapse = ","))
   
-  chi_GTF <- GTF[queryHits(overlaps)]
-  chi_te <- te[subjectHits(overlaps)]
+  S4Vectors::mcols(GTF)$TE_name <- "none"
+  S4Vectors::mcols(GTF)$TE_name[as.integer(names(repeats))] <- unlist(repeats)
   
-  # Add TE details to GTF
-  chi_GTF$name <- chi_te$name
-  chi_GTF$family <- chi_te$family
-  chi_GTF$class <- chi_te$class
+  S4Vectors::mcols(GTF)$TE_class <- "none"
+  S4Vectors::mcols(GTF)$TE_class[as.integer(names(class))] <- unlist(class)
   
-  class <- split(x = te$class[S4Vectors::subjectHits(overlaps)], f = S4Vectors::queryHits(overlaps))
-  class <- lapply(class, function(x) paste(x, collapse = ","))
+  CHI_GTF <- GTF[S4Vectors::mcols(GTF)$TE_name != "none"]
   
-  repeats <- split(x = te$names[S4Vectors::subjectHits(overlaps)], f = S4Vectors::queryHits(overlaps))
-  repeats <- lapply(repeats, function(x) paste(x, collapse = ","))
+  ## remove metadata columns that are entirely NA
+  chi_mc <- S4Vectors::mcols(CHI_GTF)
+  keep_cols <- vapply(seq_along(chi_mc), function(i) {
+    !all(is.na(chi_mc[[i]]))
+  }, logical(1))
   
-  GTF$TE_name <- "none"
-  GTF$TE_name[as.numeric(names(repeats))] <- unlist(repeats)
+  S4Vectors::mcols(CHI_GTF) <- chi_mc[, keep_cols, drop = FALSE]
   
-  GTF$TE_class <- "none"
-  GTF$TE_class[as.numeric(names(class))] <- unlist(class)
-  
-  # Filter to keep only rows with TE information
-  CHI_GTF <- GTF[GTF$TE_name != "none", ]
-  
-  return(CHI_GTF)
+  CHI_GTF
 }
+
+#' @title Build an isoform support matrix across multiple GTF files
+#' @description Compare multiple query GTF files against a reference transcriptome and return a presence/absence matrix based on gffcompare tracking files.
+#' @param reference Character. Path to the reference GTF.
+#' @param gtffiles Character vector. Paths to query GTF files.
+#' @param conditions Character vector. Sample, platform, or depth names corresponding to `gtffiles`.
+#' @param out_dir Character. Output directory for gffcompare results.
+#' @param out_prefix Character. Prefix for output files.
+#' @param params Additional parameters passed to gffcompare.
+#' @param FPKM Optional numeric matrix. Rows correspond to isoforms and columns correspond to `conditions`.
+#' @param threshold Numeric. FPKM cutoff used when refining presence.
+#' @param cores Integer. Number of cores for parallel execution.
+#' @param fill_missing_annot Logical. Whether to fill missing annotation using `lookup_annot_tx()`. Default is FALSE.
+#' @return A tibble with one row per reference transcript and one logical column per condition.
+#' @export
+buildIsoformSupport <- function(reference,
+                                gtffiles,
+                                conditions,
+                                out_dir = ".",
+                                out_prefix = "cmp",
+                                params = "",
+                                FPKM = NULL,
+                                threshold = 0.1,
+                                cores = 4,
+                                fill_missing_annot = FALSE) {
+  stopifnot(length(gtffiles) == length(conditions))
+  
+  if (!file.exists(reference)) {
+    stop("Reference GTF not found: ", reference)
+  }
+  
+  if (!all(file.exists(gtffiles))) {
+    stop("Some query GTF files do not exist.")
+  }
+  
+  dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+  
+  tracking_paths <- parallel::mclapply(seq_along(gtffiles), function(i) {
+    outfile <- file.path(out_dir, paste0(out_prefix, "_", conditions[i], ".gtf"))
+    
+    gffcompareAnno(
+      reference = reference,
+      gtffile = gtffiles[i],
+      outfile = outfile,
+      params = params,
+      overwrite = TRUE
+    )
+    
+    tracking <- sub("\\.gtf$", ".tracking", outfile)
+    
+    if (!file.exists(tracking)) {
+      stop("Tracking file not found: ", tracking)
+    }
+    
+    tracking
+  }, mc.cores = cores) |> unlist()
+  
+  buildIsoformPresence(
+    trackingFiles = tracking_paths,
+    conditions = conditions,
+    reference = reference,
+    fpkm_mat = FPKM,
+    threshold = threshold,
+    cores = cores,
+    fill_missing_annot = fill_missing_annot
+  )
+}
+

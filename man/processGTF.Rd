@@ -4,19 +4,19 @@
 \alias{processGTF}
 \title{Process GTF and SummarizedExperiment for TE overlap analysis}
 \usage{
-processGTF(te, gtf_path = NULL, combineSE = NULL, minoverlap = 0, threads = 9)
+processGTF(te, gtfPath = NULL, combineSE = NULL, minoverlap = 0, threads = 9)
 }
 \arguments{
 \item{te}{GRanges object. Transposable element annotations, required for overlap analysis.
 The `te` object must contain at least three metadata columns: `names`, `family`, and `class`.}
 
-\item{combineSE}{SummarizedExperiment. Pre-processed RNA-seq quantification object (optional, required if gtfFile is NULL).}
+\item{gtfPath}{Character. Path to the GTF file (optional, required if combineSE is NULL).}
 
-\item{minoverlap}{Integer. Minimum required overlap (in base pairs) between GTF exons and TE annotations.}
+\item{combineSE}{SummarizedExperiment. Pre-processed RNA-seq quantification object (optional, required if gtfPath is NULL).}
 
-\item{threads}{Integer. Number of threads to use for parallel processing. Default is 4.}
+\item{minoverlap}{Integer. Minimum required overlap (in base pairs) between GTF exons and TE annotations. Default is 0.}
 
-\item{gtfFile}{Character. Path to the GTF file (optional, required if combineSE is NULL).}
+\item{threads}{Integer. Number of threads to use for parallel processing. Default is 9.}
 }
 \value{
 A GRanges object with transcripts overlapping TEs, annotated with TE information.
