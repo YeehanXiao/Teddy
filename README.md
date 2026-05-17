@@ -144,13 +144,16 @@ calculateFoldchange(object = chi_test, genes = genes, crossVar="condition")
 
 ### 3.8 Visualize Form and Expression Fluctuation of TE-chimeric Transcripts
 
-**3.8.1** To investigate the structural form and expression changes of TE-chimeric transcripts, TEDDY includes the `formPlot` function. This tool is designed to visualize how transposable elements (TEs) integrate within specific transcripts.
+**3.8.1** 
+
+To investigate the structural form and expression changes of TE-chimeric transcripts, TEDDY includes the `formPlot` function. This tool is designed to visualize how transposable elements (TEs) integrate within specific transcripts.
 
 ```r
 formPlot(GTF = GTF, txid = txid, rank = 1, geneName = geneName, TEname = TEname)
 ```
 
 **3.8.2 Plotting Gene Body and Specific Isoform Structure and Expression**
+
 To visualize the structure of a gene body and the expression of a specific isoform, particularly showcasing the results of the previously mentioned `ChimericDrivenTest`, the `diffBinPlot` function is developed. This function generates a plot that highlights the gene body and isoform structure against the backdrop of expression levels, effectively visualizing the impact of TE-chimeric events on the expression.
 
 ```r
@@ -178,3 +181,11 @@ MotifSearch(object = object, te = te, pwm = pwm, filter = filter, min.score = mi
 | **A. <br>Reference & Annotation** | `stringtieMerge()`<br><br><br>`gffcompareAnno()`<br><br><br>`prepareAnno()` | Per-sample GTF(optional reference); <br><br>Reference GTF+merged GTF<br><br>Annotated  GTF + TE annotation (GRanges) |  Unified transcript reference <br><br><br>Annotated transcript reference<br><br><br>Flattened exond binsd withd TEd labels | Merged GTF<br><br><br>Annotated merged GTF<br><br><br>GRanges object | Provide unified reference<br><br><br>Label known vs novel isoforms<br><br><br>Enable exon -level counting  | Ensure consistent chromosome naming <br><br><br>Preserve `transcript_id` / `gene_id`<br><br><br>Match `seqlevelsStyle` with BAM & TE |
 | **B. <br>Exon-level counts** | `countAnno()` |  Flattened annotation  + BAM files |  Exon-bin × sample  count matrix |  SummarizedExperiment object  | Exon-level QC and downstream analyses | Use correct `isLongRead` / `isPairedEnd` by platform |
 | **C. <br>Transcript-level abundance** | `stringtieCombine()` | Annotated merged GTF + BAM files； +Per-sample GTFs | Transcript-level abundance estimates + full GTF | SummarizedExperiment object | Cross-platform expression & structure analysis | Use `longRead=TRUE` for ONT/PacBio; ensure rownames = `transcript_id` |
+
+
+## Tutorials
+
+For step-by-step workflows, see the detailed tutorials:
+
+- [TEDDY core workflow](articles/core-workflow.html)
+- [TEDDY downstream analysis](articles/downstream-analysis.html)
