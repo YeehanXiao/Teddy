@@ -8,76 +8,91 @@
 
 ## 1. Getting Started
 
-### 1.1 Preparation
+### 1.1 Installation
 
-Optional: compile Teddy and its bundled dependencies from source
+TEDDY can be installed either from Bioconda or from source.
 
-You can skip this step unless the standard installation fails or you need to rebuild the bundled binaries for troubleshooting or development.
+#### Option 1: Install from Bioconda
+
+For users who prefer an environment-managed installation, TEDDY is available through Bioconda:
 
 ```bash
-cd Teddy
-cd src && make -j8
+conda install bioconda::r-teddy
 ```
 
-All required libraries (libdeflate, xz, bzip2, Stringtie...) are included under `src/deps`, and will be compiled automatically.
+This option installs TEDDY together with its Conda-resolved package dependencies.
 
-The `-j` option enables parallel compilation to speed up installation. Adjust the number of parallel jobs according to your local machine or server environment.
+Genome-specific `BSgenome` packages are not fixed dependencies of TEDDY, because the appropriate genome sequence depends on the species and genome build used in each analysis. If you use sequence extraction or motif-search functions, please install the corresponding `BSgenome` package separately.
 
-### 1.2 Installation
-
-Since `Teddy` relies on several bioinformatics packages from Bioconductor, install these dependencies first before installing the `Teddy` package itself.
-
-**Step 1: Install Dependencies (in R console)**
-
-Please open your R console and run the following commands to ensure all required packages are installed:
+For example, for mouse mm10:
 
 ```r
-# Install BiocManager if not already installed
+BiocManager::install("BSgenome.Mmusculus.UCSC.mm10")
+```
+
+For human hg38:
+
+```r
+BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
+```
+
+#### Option 2: Install from source
+
+If you install TEDDY from source, please install the required R dependencies first.
+
+**Step 1: Install R dependencies**
+
+Open an R console and run:
+
+```r
 if (!require("BiocManager", quietly = TRUE)) {
     install.packages("BiocManager")
 }
 
-# Install required dependencies from Bioconductor
 bioc_deps <- c(
-  "rtracklayer", "GenomicFeatures", "Rsamtools", 
-  "GenomicAlignments", "GenomicRanges", "IRanges", 
-  "S4Vectors", "SummarizedExperiment", "Rsubread", 
+  "rtracklayer", "GenomicFeatures", "Rsamtools",
+  "GenomicAlignments", "GenomicRanges", "IRanges",
+  "S4Vectors", "SummarizedExperiment", "Rsubread",
   "DESeq2", "statmod", "BiocParallel", "MatrixGenerics"
 )
+
 BiocManager::install(bioc_deps)
 ```
 
+**Step 2: Compile bundled C/C++ components**
 
-> **Note on Reference Genomes:**  
+In the terminal, run:
 
-In the examples shown here, we use the mouse genome (mm10) for illustration. If you are working with another species (for example, human hg38), please install the corresponding BSgenome package and specify it explicitly in the function arguments.
-
-```r
-# Install the default mouse genome package used by Teddy
-BiocManager::install("BSgenome.Mmusculus.UCSC.mm10")
+```bash
+cd Teddy/src
+make -j8
 ```
 
+All required bundled libraries and external components are compiled from source during this step. The `-j` option enables parallel compilation; adjust the number of jobs according to your local machine or server environment.
 
+**Step 3: Install TEDDY**
 
-**Step 2: Install Teddy (in Terminal)**
-
-After the dependencies are installed and the preparation step is complete, return to your terminal. Navigate back to the parent directory and install the package:
+Return to the parent directory and install the package:
 
 ```bash
 cd ../..
 R CMD INSTALL Teddy
 ```
 
-*(Note: If you have already navigated inside the `Teddy` folder, you should use `R CMD INSTALL .` instead.)*
+If you are already inside the `Teddy` directory, use:
 
-### 1.3 Troubleshooting Compilation
+```bash
+R CMD INSTALL .
+```
 
-If you encounter build errors during compilation, especially after switching machines or modifying source files, consider cleaning previously compiled artifacts before rebuilding:
+### 1.2 Troubleshooting Compilation
+
+If you encounter build errors during compilation, especially after switching machines or modifying source files, clean previously compiled artifacts before rebuilding:
 
 ```bash
 cd Teddy/src
 make clean
-make -j
+make -j8
 ```
 
 ## 2. Initialization
@@ -88,7 +103,7 @@ library(Teddy)
 
 ## 3. Identify chimeric transcripts
 
-### 3.1 Assemble reads into transcripts by Stringtie
+### 3.1 Assemble reads into transcripts by StringTie
 
 ```r
 Teddy::stringtieAssembly(bam = bam, reference = reference, outfile = outfile)
@@ -106,7 +121,7 @@ Teddy::stringtieMerge(reference = reference, gtfFiles = gtfFiles, outfile = N_re
 Teddy::gffcompareAnno(reference = reference, gtfFile = N_reference, outfile = annoGTF)
 ```
 
-### 3.4 Flatten the transcripts into counting bins and annotate them via the annotated TE reference as a GRanges obejct
+### 3.4 Flatten the transcripts into counting bins and annotate them via the annotated TE reference as a GRanges object
 
 ```r
 anno <- Teddy::prepareAnno(gtffile = N_reference, transposon = transposon)
@@ -178,9 +193,9 @@ MotifSearch(object = object, te = te, pwm = pwm, filter = filter, min.score = mi
 
 | Level | Steps / Functions |   Key Inputs  | Key Outputs | Object | Primary use | Notes |
 |-----------------|-------------------|------------------|---------------------|------------------|----------------------|---------------|
-| **A. <br>Reference & Annotation** | `stringtieMerge()`<br><br><br>`gffcompareAnno()`<br><br><br>`prepareAnno()` | Per-sample GTF(optional reference); <br><br>Reference GTF+merged GTF<br><br>Annotated  GTF + TE annotation (GRanges) |  Unified transcript reference <br><br><br>Annotated transcript reference<br><br><br>Flattened exond binsd withd TEd labels | Merged GTF<br><br><br>Annotated merged GTF<br><br><br>GRanges object | Provide unified reference<br><br><br>Label known vs novel isoforms<br><br><br>Enable exon -level counting  | Ensure consistent chromosome naming <br><br><br>Preserve `transcript_id` / `gene_id`<br><br><br>Match `seqlevelsStyle` with BAM & TE |
+| **A. <br>Reference & Annotation** | `stringtieMerge()`<br><br><br>`gffcompareAnno()`<br><br><br>`prepareAnno()` | Per-sample GTF(optional reference); <br><br>Reference GTF+merged GTF<br><br>Annotated  GTF + TE annotation (GRanges) |  Unified transcript reference <br><br><br>Annotated transcript reference<br><br><br>Flattened exon bins with TE labels | Merged GTF<br><br><br>Annotated merged GTF<br><br><br>GRanges object | Provide unified reference<br><br><br>Label known vs novel isoforms<br><br><br>Enable exon -level counting  | Ensure consistent chromosome naming <br><br><br>Preserve `transcript_id` / `gene_id`<br><br><br>Match `seqlevelsStyle` with BAM & TE |
 | **B. <br>Exon-level counts** | `countAnno()` |  Flattened annotation  + BAM files |  Exon-bin × sample  count matrix |  SummarizedExperiment object  | Exon-level QC and downstream analyses | Use correct `isLongRead` / `isPairedEnd` by platform |
-| **C. <br>Transcript-level abundance** | `stringtieCombine()` | Annotated merged GTF + BAM files； +Per-sample GTFs | Transcript-level abundance estimates + full GTF | SummarizedExperiment object | Cross-platform expression & structure analysis | Use `longRead=TRUE` for ONT/PacBio; ensure rownames = `transcript_id` |
+| **C. <br>Transcript-level abundance** | `stringtieCombine()` | Annotated merged GTF + BAM files； + Per-sample GTFs | Transcript-level abundance estimates + full GTF | SummarizedExperiment object | Cross-platform expression & structure analysis | Use `longRead=TRUE` for ONT/PacBio; ensure rownames = `transcript_id` |
 
 
 ## Tutorials
