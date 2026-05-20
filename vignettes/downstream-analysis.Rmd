@@ -185,7 +185,7 @@ formPlot(
 )
 ```
 
-<img src="../man/figures/formplot.png" alt="Example output of formPlot" width="100%">
+<img src="../man/figures/formplot.png" alt="Example output of formPlot" style="width:60%; display:block; margin:auto;">
 
 **Notes**
 
