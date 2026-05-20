@@ -202,5 +202,5 @@ MotifSearch(object = object, te = te, pwm = pwm, filter = filter, min.score = mi
 
 For step-by-step workflows, see the detailed tutorials:
 
-- [TEDDY core workflow](articles/core-workflow.html)
-- [TEDDY downstream analysis](articles/downstream-analysis.html)
+- [TEDDY core workflow](https://yeehanxiao.github.io/Teddy/articles/core-workflow.html)
+- [TEDDY downstream analysis](https://yeehanxiao.github.io/Teddy/articles/downstream-analysis.html)
