@@ -6,7 +6,7 @@ deps:
 	rm -rf ./deps/libdeflate/build
 	cmake -S ./deps/libdeflate -B ./deps/libdeflate/build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
 	cmake --build ./deps/libdeflate/build -j1
-	cd ./deps/xz && make clean || true && ./configure --prefix=$(PWD)/install && make -j1 && make install
+	cd ./deps/xz && make clean || true && ./configure --prefix=$(PWD)/install --disable-nls && make -j1 && make install
 	cd ./deps/bzip2 && make clean || true && make libbz2.a
 	cd ./deps/htslib && make clean || true && make libhts.a
 
