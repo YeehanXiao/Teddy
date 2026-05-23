@@ -25,4 +25,6 @@ prepareAnno(
 }
 \description{
 Flatten exon appearing multiple times among different transcripts in GTF file
+
+Flatten exon appearing multiple times among different transcripts in GTF file
 }

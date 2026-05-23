@@ -209,16 +209,33 @@ gffcompareAnno <- function(reference, gtffile, outfile, params = "",
 #' @param cores Number of cores used for parallel processing. Default is 1.
 #' @importFrom BiocParallel bplapply MulticoreParam
 #' @importFrom rtracklayer import.gff
-#' @importFrom GenomicFeatures exonicParts makeTxDbFromGRanges
+#' @importFrom GenomicFeatures exonicParts
 #' @importFrom GenomicRanges strand
 #' @importFrom IRanges findOverlaps
 #' @importFrom S4Vectors subjectHits queryHits mcols
+#' @export
+#' @title Preparing the genome annotation object
+#' @description Flatten exon appearing multiple times among different transcripts in GTF file
+#' @param gtffile GTF file.
+#' @param singleGens Whether to allocate the exon overlapping with two genes to a single gene. Default is TRUE.
+#' @param transposon A GRanges object with transposon data
+#' @param minoverlap Minimum overlap for \code{\link[IRanges]{findOverlaps}}. Default is 10.
+#' @param cores Number of cores used for parallel processing. Default is 1.
+#' @importFrom BiocParallel bplapply MulticoreParam
+#' @importFrom rtracklayer import.gff
+#' @importFrom GenomicFeatures exonicParts 
+#' @importFrom GenomicRanges strand
+#' @importFrom IRanges findOverlaps
+#' @importFrom S4Vectors subjectHits queryHits mcols
+#' @importFrom txdbmaker makeTxDbFromGRanges
 #' @export
 prepareAnno <- function(gtffile, singleGens = TRUE, transposon = NULL, minoverlap = 10,  cores = 4) {
   gtfGr <- rtracklayer::import.gff(con = gtffile)
   message("Remove transcripts missing strand information.")
   gtfGr <- gtfGr[!GenomicRanges::strand(gtfGr) == "*"]
-  txdb <- GenomicFeatures::makeTxDbFromGRanges(gr = gtfGr)
+  txdb <- suppressWarnings(
+    txdbmaker::makeTxDbFromGRanges(gr = gtfGr)
+  )
   exonicParts <- GenomicFeatures::exonicParts(txdb = txdb, 
                                               linked.to.single.gene.only = singleGens)
   exonrank <- split(x = exonicParts$exonic_part, 
@@ -234,30 +251,34 @@ prepareAnno <- function(gtffile, singleGens = TRUE, transposon = NULL, minoverla
       order(as.integer(exonrank[[x]]))
     }
   })
-
+  
   names(exonicpart) <- names(exonrank)
   exonicpart <- exonicpart[unique(exonicParts$gene_id)]
   exonicParts$exonic_part <- unlist(exonicpart)
-
+  
   if (!is.null(transposon)) {
     if (!c("names") %in% colnames(S4Vectors::mcols(transposon)) || !is(transposon, "GRanges")) {
       stop("Transposone must be a Granges object that includes a column named 'names'.")
     }
-      target_style <- suppressWarnings(GenomeInfoDb::seqlevelsStyle(exonicParts)[1])
-        is_ncbi_format <- TRUE
-      if (!is.na(target_style) && target_style == "UCSC") {
-        is_ncbi_format <- FALSE
-      }
+    target_style <- suppressWarnings(GenomeInfoDb::seqlevelsStyle(exonicParts)[1])
+    is_ncbi_format <- TRUE
+    if (!is.na(target_style) && target_style == "UCSC") {
+      is_ncbi_format <- FALSE
+    }
     transposon <- NCBI_check(transposon, replace_name = FALSE, ncbi_style = is_ncbi_format)
-    overlaps <- IRanges::findOverlaps(query = exonicParts, subject = transposon, 
-                                      minoverlap = minoverlap)
+    overlaps <- suppressWarnings(
+      IRanges::findOverlaps(
+        query = exonicParts,
+        subject = transposon,
+        minoverlap = minoverlap
+      )
+    )
     repeats <- split(x = transposon$names[S4Vectors::subjectHits(overlaps)], 
                      f = S4Vectors::queryHits(overlaps))
     repeats <- lapply(X = repeats, FUN = function(x) paste(x, collapse = ","))
     exonicParts$transposon <- "none"
     exonicParts$transposon[as.numeric(names(repeats))] <- unlist(repeats)
   }
-
   return(exonicParts)
 }
 
