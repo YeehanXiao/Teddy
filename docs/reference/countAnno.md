@@ -1,7 +1,7 @@
-# Counting reads on the exon
+# Counting reads on exon bins
 
-Counting the number of reads that fall into each exon bin defined in the
-flattened GTF/GFF object.
+Count reads overlapping exon bins defined in the flattened GTF/GFF
+object.
 
 ## Usage
 
@@ -46,8 +46,12 @@ countAnno(
 
 - nthreads:
 
-  Number of threads to use.
+  Number of BAM files processed in parallel.
 
 - ...:
 
-  Additional arguments passed to featureCounts().
+  Additional arguments passed to Rsubread::featureCounts().
+
+## Value
+
+A RangedSummarizedExperiment object containing a counts assay.

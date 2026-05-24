@@ -2,7 +2,7 @@
 % Please edit documentation in R/core.R
 \name{countAnno}
 \alias{countAnno}
-\title{Counting reads on the exon}
+\title{Counting reads on exon bins}
 \usage{
 countAnno(
   annotation,
@@ -28,11 +28,13 @@ countAnno(
 
 \item{isLongRead}{Logical, whether this is long-read data (e.g. ONT, PacBio).}
 
-\item{nthreads}{Number of threads to use.}
+\item{nthreads}{Number of BAM files processed in parallel.}
 
-\item{...}{Additional arguments passed to featureCounts().}
+\item{...}{Additional arguments passed to Rsubread::featureCounts().}
+}
+\value{
+A RangedSummarizedExperiment object containing a counts assay.
 }
 \description{
-Counting the number of reads that fall into each exon
-bin defined in the flattened GTF/GFF object.
+Count reads overlapping exon bins defined in the flattened GTF/GFF object.
 }

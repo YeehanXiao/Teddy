@@ -106,11 +106,15 @@ examples.</p>
 <span><span class="va">reference</span> <span class="op">&lt;-</span> <span class="st">"gencode.vM7.annotation.gtf"</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="project-paths">1.2 Project paths<a class="anchor" aria-label="anchor" href="#project-paths"></a>
+<h3 id="initialization-and-project-paths">1.2 Initialization and Project paths<a class="anchor" aria-label="anchor" href="#initialization-and-project-paths"></a>
 </h3>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/YeehanXiao/Teddy" class="external-link">Teddy</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">parallel</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/YeehanXiao/Teddy" class="external-link">Teddy</a></span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment" class="external-link">SummarizedExperiment</a></span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/S4Vectors" class="external-link">S4Vectors</a></span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">parallel</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">reference</span> <span class="op">&lt;-</span> <span class="st">"path/to/reference.gtf"</span></span>
 <span><span class="va">bam_dir</span>   <span class="op">&lt;-</span> <span class="st">"path/to/sorted_bam"</span></span>
@@ -568,7 +572,7 @@ TE-chimeric annotation.</p>
 <code class="sourceCode R"><span><span class="va">count_mat</span> <span class="op">&lt;-</span> <span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></code></pre></div>
 <p>For the bin-level structure annotation:</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">rowData</span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="save-the-bin-level-output">6.3 Save the bin-level output:<a class="anchor" aria-label="anchor" href="#save-the-bin-level-output"></a>

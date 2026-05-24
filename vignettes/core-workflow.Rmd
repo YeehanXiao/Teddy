@@ -54,10 +54,14 @@ reference <- "gencode.vM7.annotation.gtf"
 
 ```
 
-### 1.2 Project paths
+### 1.2 Initialization and Project paths
 ```{r setup-paths, eval=FALSE}
-library(Teddy)
-library(parallel)
+suppressPackageStartupMessages({
+  library(Teddy)
+  library(SummarizedExperiment)
+  library(S4Vectors)
+  library(parallel)
+})
 
 reference <- "path/to/reference.gtf"
 bam_dir   <- "path/to/sorted_bam"
@@ -515,7 +519,7 @@ count_mat <- SummarizedExperiment::assay(se)
 For the bin-level structure annotation:
 
 ```{r inspect-bin-annotation, eval=FALSE}
-rowData(se)
+SummarizedExperiment::rowData(se)
 ```
 
 ### 6.3 Save the bin-level output:

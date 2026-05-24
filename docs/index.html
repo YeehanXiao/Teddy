@@ -119,69 +119,83 @@
 <div class="section level3">
 <h3 id="id_12-troubleshooting-compilation">1.2 Troubleshooting Compilation<a class="anchor" aria-label="anchor" href="#id_12-troubleshooting-compilation"></a>
 </h3>
-<p>If you encounter build errors during compilation, especially after switching machines or modifying source files, clean previously compiled artifacts before rebuilding:</p>
+<ul>
+<li>If you encounter build errors during compilation, especially after switching machines or modifying source files, clean previously compiled artifacts before rebuilding:</li>
+</ul>
 <div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="bu">cd</span> Teddy/src</span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">make</span> clean</span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">make</span> <span class="at">-j8</span></span></code></pre></div>
+<p>macOS build errors:</p>
+<ul>
+<li>To resolve <code>automake-1.16: command not found</code>, install the missing build dependencies using Homebrew:</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="ex">brew</span> install automake autoconf libtool m4</span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="id_2-initialization">2. Initialization<a class="anchor" aria-label="anchor" href="#id_2-initialization"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/YeehanXiao/Teddy" class="external-link">Teddy</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="id_3-identify-chimeric-transcripts">3. Identify chimeric transcripts<a class="anchor" aria-label="anchor" href="#id_3-identify-chimeric-transcripts"></a>
 </h2>
+<p>Here, <code>reference</code> is the official genome annotation GTF, <code>mergedGTF</code> is the intermediate merged transcriptome GTF, and <code>annoGTF</code> is the gffcompare-annotated merged GTF used for downstream TE annotation and quantification.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">reference</span> <span class="op">&lt;-</span> <span class="st">"path/to/reference.gtf"</span></span>
+<span><span class="va">mergedGTF</span> <span class="op">&lt;-</span> <span class="st">"path/to/merged.gtf"</span></span>
+<span><span class="va">annoGTF</span> <span class="op">&lt;-</span> <span class="st">"path/to/annotated.gtf"</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="id_31-assemble-reads-into-transcripts-by-stringtie">3.1 Assemble reads into transcripts by StringTie<a class="anchor" aria-label="anchor" href="#id_31-assemble-reads-into-transcripts-by-stringtie"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">Teddy</span><span class="fu">::</span><span class="fu"><a href="reference/stringtieAssembly.html">stringtieAssembly</a></span><span class="op">(</span>bam <span class="op">=</span> <span class="va">bam</span>, reference <span class="op">=</span> <span class="va">reference</span>, outfile <span class="op">=</span> <span class="va">outfile</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="id_32-merge-various-gtf-files-among-different-samples-for-a-unified-newly-assembled-reference">3.2 Merge various GTF files among different samples for a unified newly assembled reference<a class="anchor" aria-label="anchor" href="#id_32-merge-various-gtf-files-among-different-samples-for-a-unified-newly-assembled-reference"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">Teddy</span><span class="fu">::</span><span class="fu"><a href="reference/stringtieMerge.html">stringtieMerge</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">reference</span>, gtfFiles <span class="op">=</span> <span class="va">gtfFiles</span>, outfile <span class="op">=</span> <span class="va">N_reference</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">Teddy</span><span class="fu">::</span><span class="fu"><a href="reference/stringtieMerge.html">stringtieMerge</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">reference</span>, gtfFiles <span class="op">=</span> <span class="va">gtfFiles</span>, outfile <span class="op">=</span> <span class="va">mergedGTF</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="id_33-annotate-the-newly-assembled-reference-via-the-genome-reference">3.3 Annotate the newly assembled reference via the genome reference<a class="anchor" aria-label="anchor" href="#id_33-annotate-the-newly-assembled-reference-via-the-genome-reference"></a>
 </h3>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">Teddy</span><span class="fu">::</span><span class="fu"><a href="reference/gffcompareAnno.html">gffcompareAnno</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">reference</span>, gtfFile <span class="op">=</span> <span class="va">N_reference</span>, outfile <span class="op">=</span> <span class="va">annoGTF</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">Teddy</span><span class="fu">::</span><span class="fu"><a href="reference/gffcompareAnno.html">gffcompareAnno</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">reference</span>, gtffile <span class="op">=</span> <span class="va">mergedGTF</span>, outfile <span class="op">=</span> <span class="va">annoGTF</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="id_34-flatten-the-transcripts-into-counting-bins-and-annotate-them-via-the-annotated-te-reference-as-a-granges-object">3.4 Flatten the transcripts into counting bins and annotate them via the annotated TE reference as a GRanges object<a class="anchor" aria-label="anchor" href="#id_34-flatten-the-transcripts-into-counting-bins-and-annotate-them-via-the-annotated-te-reference-as-a-granges-object"></a>
 </h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">anno</span> <span class="op">&lt;-</span> <span class="fu">Teddy</span><span class="fu">::</span><span class="fu"><a href="reference/prepareAnno.html">prepareAnno</a></span><span class="op">(</span>gtffile <span class="op">=</span> <span class="va">N_reference</span>, transposon <span class="op">=</span> <span class="va">transposon</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">anno</span> <span class="op">&lt;-</span> <span class="fu">Teddy</span><span class="fu">::</span><span class="fu"><a href="reference/prepareAnno.html">prepareAnno</a></span><span class="op">(</span>gtffile <span class="op">=</span> <span class="va">annoGTF</span>, transposon <span class="op">=</span> <span class="va">te</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="id_35-count-the-reads-falling-into-the-counting-bins-among-bam-files">3.5 Count the reads falling into the counting bins among bam files<a class="anchor" aria-label="anchor" href="#id_35-count-the-reads-falling-into-the-counting-bins-among-bam-files"></a>
 </h3>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/countAnno.html">countAnno</a></span><span class="op">(</span>annotation <span class="op">=</span> <span class="va">anno</span>, bamfiles <span class="op">=</span> <span class="va">bamfile</span>, nthreads <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/countAnno.html">countAnno</a></span><span class="op">(</span>annotation <span class="op">=</span> <span class="va">anno</span>, bamfile <span class="op">=</span> <span class="va">bamfiles</span>, nthreads <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="id_36-count-the-reads-falling-into-the-transcripts-among-bam-files">3.6 Count the reads falling into the transcripts among bam files<a class="anchor" aria-label="anchor" href="#id_36-count-the-reads-falling-into-the-transcripts-among-bam-files"></a>
 </h3>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">combineSE</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/stringtieCombine.html">stringtieCombine</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">N_reference</span>, </span>
-<span>                              bamfile <span class="op">=</span> <span class="va">bamfiles</span>,</span>
-<span>                              params <span class="op">=</span> <span class="st">"-p 70"</span>, </span>
-<span>                              gtfFiles <span class="op">=</span> <span class="va">gtfFiles</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">combineSE</span> <span class="op">&lt;-</span> <span class="fu">Teddy</span><span class="fu">::</span><span class="fu"><a href="reference/stringtieCombine.html">stringtieCombine</a></span><span class="op">(</span></span>
+<span>  reference <span class="op">=</span> <span class="va">annoGTF</span>,</span>
+<span>  bamFiles  <span class="op">=</span> <span class="va">bamfiles</span>,</span>
+<span>  gtfFiles  <span class="op">=</span> <span class="va">gtfFiles</span>,</span>
+<span>  params    <span class="op">=</span> <span class="st">"-p 8"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="id_37-detect-to-what-extent-te-chimeric-exon-affect-the-expression-of-the-corresponding-transcript">3.7 Detect to what extent TE-chimeric exon affect the expression of the corresponding transcript<a class="anchor" aria-label="anchor" href="#id_37-detect-to-what-extent-te-chimeric-exon-affect-the-expression-of-the-corresponding-transcript"></a>
 </h3>
 <p><strong>3.7.1</strong> Fit the counts with the formula <code>~sample + TE-chimeric + condition:TE-chimeric</code> and compare it to the null model <code>~ sample + TE-chimeric</code>. TE-chimeric is a factor with two levels, which classified the exon as TE-chimeric exon or other exon. Compare the deviances of two GLM fits for each counting bin through χ2-distribution test and extract the result from the test.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chi_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ChimericDrivenTest.html">ChimericDrivenTest</a></span><span class="op">(</span>SEobject <span class="op">=</span> <span class="va">se</span>, condition <span class="op">=</span> <span class="va">condition</span><span class="op">)</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/extractTest.html">extractTest</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">chi_test</span><span class="op">)</span></span></code></pre></div>
 <p><strong>3.7.2</strong> Estimate relative fold changes of counts in the TE-chimeric exon among different conditions and versus other exons, calculated by a GLM fit based on the formula <code>count ~ condition + TE-chimeric + condition:TE-chimeric</code>. The interaction coefficient reflects that the fraction of the gene’s reads of TE-chimeric exon differs significantly between the different experimental conditions. That is, TE-chimeric transcripts may play a role under different biological conditions.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/calculateFoldchange.html">calculateFoldchange</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">chi_test</span>, genes <span class="op">=</span> <span class="va">genes</span>, crossVar<span class="op">=</span><span class="st">"condition"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -189,14 +203,14 @@
 </h3>
 <p><strong>3.8.1</strong></p>
 <p>To investigate the structural form and expression changes of TE-chimeric transcripts, TEDDY includes the <code>formPlot</code> function. This tool is designed to visualize how transposable elements (TEs) integrate within specific transcripts.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/formPlot.html">formPlot</a></span><span class="op">(</span>GTF <span class="op">=</span> <span class="va">GTF</span>, txid <span class="op">=</span> <span class="va">txid</span>, rank <span class="op">=</span> <span class="fl">1</span>, geneName <span class="op">=</span> <span class="va">geneName</span>, TEname <span class="op">=</span> <span class="va">TEname</span><span class="op">)</span></span></code></pre></div>
 <p><strong>3.8.2 Plotting Gene Body and Specific Isoform Structure and Expression</strong></p>
 <p>To visualize the structure of a gene body and the expression of a specific isoform, particularly showcasing the results of the previously mentioned <code>ChimericDrivenTest</code>, the <code>diffBinPlot</code> function is developed. This function generates a plot that highlights the gene body and isoform structure against the backdrop of expression levels, effectively visualizing the impact of TE-chimeric events on the expression.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/diffBinPlot.html">diffBinPlot</a></span><span class="op">(</span>count <span class="op">=</span> <span class="va">count</span>, conditions <span class="op">=</span> <span class="va">condition</span>, annotation <span class="op">=</span> <span class="va">anno</span>,</span>
 <span>            idx <span class="op">=</span> <span class="va">geneIndex</span>, </span>
-<span>            gtf <span class="op">=</span> <span class="va">N_reference</span>,</span>
+<span>            gtf <span class="op">=</span> <span class="va">annoGTF</span>,</span>
 <span>            txid <span class="op">=</span> <span class="va">txid</span>,</span>
 <span>            chi_test <span class="op">=</span> <span class="va">chi_test</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -205,12 +219,12 @@
 </h3>
 <p>TEDDY enables the identification of motif binding sites within TE-chimeric transcripts, leveraging the <code>pcmFunction</code> to convert motifs of interest from probability matrix (PCM) to position weight matrix (PWM) format. This PWM can then be used as an input for motif search. By applying various thresholds for filtering and integrating other epigenetic data, users can construct potential motif networks that offer insights into the regulatory mechanisms of TE-chimeric transcripts.</p>
 <p>To perform motif search on TE-chimeric transcripts, the <code>MotifSearch</code> function can be utilized as follows:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/MotifSearch.html">MotifSearch</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">object</span>, te <span class="op">=</span> <span class="va">te</span>, pwm <span class="op">=</span> <span class="va">pwm</span>, filter <span class="op">=</span> <span class="va">filter</span>, min.score <span class="op">=</span> <span class="va">min.score</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="teddy-outputs-at-a-glance">Teddy outputs at a glance<a class="anchor" aria-label="anchor" href="#teddy-outputs-at-a-glance"></a>
+<h2 id="teddy-outputs-at-a-glance">TEDDY outputs at a glance<a class="anchor" aria-label="anchor" href="#teddy-outputs-at-a-glance"></a>
 </h2>
 <table style="width:100%;" class="table">
 <colgroup>

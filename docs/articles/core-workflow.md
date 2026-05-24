@@ -47,12 +47,16 @@ R.utils::gunzip("gencode.vM7.annotation.gtf.gz", remove = FALSE)
 reference <- "gencode.vM7.annotation.gtf"
 ```
 
-### 1.2 Project paths
+### 1.2 Initialization and Project paths
 
 ``` r
 
-library(Teddy)
-library(parallel)
+suppressPackageStartupMessages({
+  library(Teddy)
+  library(SummarizedExperiment)
+  library(S4Vectors)
+  library(parallel)
+})
 
 reference <- "path/to/reference.gtf"
 bam_dir   <- "path/to/sorted_bam"
@@ -584,7 +588,7 @@ For the bin-level structure annotation:
 
 ``` r
 
-rowData(se)
+SummarizedExperiment::rowData(se)
 ```
 
 ### 6.3 Save the bin-level output:

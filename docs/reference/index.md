@@ -19,7 +19,7 @@
 - [`prepareAnno()`](https://yeehanxiao.github.io/Teddy/reference/prepareAnno.md)
   : Preparing the genome annotation object
 - [`countAnno()`](https://yeehanxiao.github.io/Teddy/reference/countAnno.md)
-  : Counting reads on the exon
+  : Counting reads on exon bins
 - [`processGTF()`](https://yeehanxiao.github.io/Teddy/reference/processGTF.md)
   : Process GTF and SummarizedExperiment for TE overlap analysis
 

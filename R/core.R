@@ -329,20 +329,24 @@ stringtieCombine <- function(reference = NULL, bamFiles = NULL, gtfFiles = NULL,
   return(SE)
 }
 
-#' @title Counting reads on the exon
-#' @description Counting the number of reads that fall into each exon
-#' bin defined in the flattened GTF/GFF object.
+
+#' @title Counting reads on exon bins
+#' @description Count reads overlapping exon bins defined in the flattened GTF/GFF object.
 #' @param annotation A GRanges object, typically from prepareAnno().
 #' @param bamfile Character vector of BAM file(s).
 #' @param isPairedEnd Logical scalar or vector, whether the library is paired-end.
 #' @param strandSpecific Integer: 0 (unstranded), 1 (forward), or 2 (reverse).
 #' @param allowMultiOverlap Logical, whether to allow reads to overlap multiple features.
 #' @param isLongRead Logical, whether this is long-read data (e.g. ONT, PacBio).
-#' @param nthreads Number of threads to use.
-#' @param ... Additional arguments passed to featureCounts().
+#' @param nthreads Number of BAM files processed in parallel.
+#' @param ... Additional arguments passed to Rsubread::featureCounts().
+#'
+#' @return A RangedSummarizedExperiment object containing a counts assay.
 #'
 #' @importFrom SummarizedExperiment SummarizedExperiment
+#' @importFrom S4Vectors DataFrame metadata
 #' @importFrom Rsubread featureCounts
+#' @importFrom parallel mclapply
 #' @export
 countAnno <- function(annotation, bamfile,
                       isPairedEnd = TRUE,
@@ -352,40 +356,108 @@ countAnno <- function(annotation, bamfile,
                       nthreads = 1,
                       ...) {
   
+  stopifnot(inherits(annotation, "GRanges"))
+  stopifnot(is.character(bamfile))
+  stopifnot(length(bamfile) >= 1)
+  stopifnot(all(file.exists(bamfile)))
+  stopifnot(length(nthreads) == 1, is.numeric(nthreads), nthreads >= 1)
+  
+  extra_args <- list(...)
+  
+  if ("nthreads" %in% names(extra_args)) {
+    stop("Please specify 'nthreads' using the countAnno() argument, not through '...'.")
+  }
+  
+  if ("isLongRead" %in% names(extra_args)) {
+    stop("Please specify 'isLongRead' using the countAnno() argument, not through '...'.")
+  }
+  
+  if (isLongRead && "maxMOp" %in% names(extra_args)) {
+    extra_args$maxMOp <- NULL
+    warning(
+      "Long-read mode detected: ignoring 'maxMOp'. ",
+      "Only 'isLongRead = TRUE' is passed to featureCounts()."
+    )
+  }
+  
   annframe <- as.data.frame(annotation)
   names(annframe)[names(annframe) == "seqnames"] <- "Chr"
-  annframe$GeneId <- paste(annotation$gene_id, annotation$exonic_part, sep = ":")
+  annframe$GeneID <- paste(annotation$gene_id, annotation$exonic_part, sep = ":")
   
-  fc_args <- list(
-    files = bamfile,
-    annot.ext = annframe,
-    isGTFAnnotationFile = FALSE,
-    useMetaFeatures = FALSE,
+  if (length(isPairedEnd) == 1) {
+    isPairedEnd <- rep(isPairedEnd, length(bamfile))
+  }
+  stopifnot(length(isPairedEnd) == length(bamfile))
+  
+  run_one_bam <- function(i) {
+    one_bam <- bamfile[i]
+    
+    fc_args <- c(
+      list(
+        files = one_bam,
+        annot.ext = annframe,
+        isGTFAnnotationFile = FALSE,
+        useMetaFeatures = FALSE,
+        isPairedEnd = isPairedEnd[i],
+        strandSpecific = strandSpecific,
+        allowMultiOverlap = allowMultiOverlap,
+        nthreads = 1L
+      ),
+      extra_args
+    )
+    
+    if (isLongRead) {
+      fc_args$isLongRead <- TRUE
+    }
+    
+    fc <- do.call(Rsubread::featureCounts, fc_args)
+    
+    counts <- as.matrix(fc$counts)
+    colnames(counts) <- basename(one_bam)
+    
+    list(
+      counts = counts,
+      stat = fc$stat
+    )
+  }
+  
+  fc_list <- parallel::mclapply(
+    seq_along(bamfile),
+    run_one_bam,
+    mc.cores = min(as.integer(nthreads), length(bamfile))
+  )
+  
+  count_mat <- do.call(
+    cbind,
+    lapply(fc_list, `[[`, "counts")
+  )
+  
+  col_data <- S4Vectors::DataFrame(
+    bamfile = bamfile,
+    sample = basename(bamfile),
+    row.names = basename(bamfile)
+  )
+  
+  se <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(counts = count_mat),
+    rowRanges = annotation,
+    colData = col_data
+  )
+  
+  S4Vectors::metadata(se)$featureCounts_stat <- lapply(fc_list, `[[`, "stat")
+  names(S4Vectors::metadata(se)$featureCounts_stat) <- basename(bamfile)
+  
+  S4Vectors::metadata(se)$featureCounts_parameters <- list(
     isPairedEnd = isPairedEnd,
     strandSpecific = strandSpecific,
     allowMultiOverlap = allowMultiOverlap,
-    nthreads = nthreads,
-    ...
+    isLongRead = isLongRead,
+    featureCounts_nthreads_per_bam = 1L,
+    sample_parallel_nthreads = min(as.integer(nthreads), length(bamfile))
   )
   
-  if (isLongRead) {
-    fc_args$isLongRead <- TRUE
-    if ("maxMOp" %in% names(fc_args)) {
-      fc_args$maxMOp <- NULL
-      warning("Long-read mode detected: Ignoring 'maxMOp'. Only 'isLongRead=TRUE' will be used.")
-    }
-  }
-  
-  fc_result <- do.call(Rsubread::featureCounts, fc_args)
-  
-  se <- SummarizedExperiment::SummarizedExperiment(
-    list(counts = as.matrix(fc_result$counts)),
-    rowRanges = annotation
-  )
-  return(se)
+  se
 }
-
-
 
 
 

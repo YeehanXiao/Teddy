@@ -87,12 +87,20 @@ R CMD INSTALL .
 
 ### 1.2 Troubleshooting Compilation
 
-If you encounter build errors during compilation, especially after switching machines or modifying source files, clean previously compiled artifacts before rebuilding:
+- If you encounter build errors during compilation, especially after switching machines or modifying source files, clean previously compiled artifacts before rebuilding:
 
 ```bash
 cd Teddy/src
 make clean
 make -j8
+```
+
+macOS build errors:
+
+- To resolve `automake-1.16: command not found`, install the missing build dependencies using Homebrew:
+
+```bash
+brew install automake autoconf libtool m4
 ```
 
 ## 2. Initialization
@@ -103,6 +111,14 @@ library(Teddy)
 
 ## 3. Identify chimeric transcripts
 
+Here, `reference` is the official genome annotation GTF, `mergedGTF` is the intermediate merged transcriptome GTF, and `annoGTF` is the gffcompare-annotated merged GTF used for downstream TE annotation and quantification. 
+
+```r
+reference <- "path/to/reference.gtf"
+mergedGTF <- "path/to/merged.gtf"
+annoGTF <- "path/to/annotated.gtf"
+```
+
 ### 3.1 Assemble reads into transcripts by StringTie
 
 ```r
@@ -112,34 +128,37 @@ Teddy::stringtieAssembly(bam = bam, reference = reference, outfile = outfile)
 ### 3.2 Merge various GTF files among different samples for a unified newly assembled reference
 
 ```r
-Teddy::stringtieMerge(reference = reference, gtfFiles = gtfFiles, outfile = N_reference)
+Teddy::stringtieMerge(reference = reference, gtfFiles = gtfFiles, outfile = mergedGTF)
 ```
+
 
 ### 3.3 Annotate the newly assembled reference via the genome reference
 
 ```r
-Teddy::gffcompareAnno(reference = reference, gtfFile = N_reference, outfile = annoGTF)
+Teddy::gffcompareAnno(reference = reference, gtffile = mergedGTF, outfile = annoGTF, overwrite = TRUE)
 ```
 
 ### 3.4 Flatten the transcripts into counting bins and annotate them via the annotated TE reference as a GRanges object
 
 ```r
-anno <- Teddy::prepareAnno(gtffile = N_reference, transposon = transposon)
+anno <- Teddy::prepareAnno(gtffile = annoGTF, transposon = te)
 ```
 
 ### 3.5 Count the reads falling into the counting bins among bam files
 
 ```r
-se <- countAnno(annotation = anno, bamfiles = bamfile, nthreads = 5)
+se <- countAnno(annotation = anno, bamfile = bamfiles, nthreads = 5)
 ```
 
 ### 3.6 Count the reads falling into the transcripts among bam files
 
 ```r
-combineSE <- stringtieCombine(reference = N_reference, 
-                              bamfile = bamfiles,
-                              params = "-p 70", 
-                              gtfFiles = gtfFiles)
+combineSE <- Teddy::stringtieCombine(
+  reference = annoGTF,
+  bamFiles  = bamfiles,
+  gtfFiles  = gtfFiles,
+  params    = "-p 8"
+)
 ```
 
 ### 3.7 Detect to what extent TE-chimeric exon affect the expression of the corresponding transcript
@@ -174,7 +193,7 @@ To visualize the structure of a gene body and the expression of a specific isofo
 ```r
 diffBinPlot(count = count, conditions = condition, annotation = anno,
             idx = geneIndex, 
-            gtf = N_reference,
+            gtf = annoGTF,
             txid = txid,
             chi_test = chi_test)
 ```
@@ -189,7 +208,7 @@ To perform motif search on TE-chimeric transcripts, the `MotifSearch` function c
 MotifSearch(object = object, te = te, pwm = pwm, filter = filter, min.score = min.score)
 ```
 
-## Teddy outputs at a glance
+## TEDDY outputs at a glance
 
 | Level | Steps / Functions |   Key Inputs  | Key Outputs | Object | Primary use | Notes |
 |-----------------|-------------------|------------------|---------------------|------------------|----------------------|---------------|
