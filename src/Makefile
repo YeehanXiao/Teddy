@@ -10,7 +10,7 @@ deps:
 	find ./deps/xz -name "configure" -exec touch {} \;
 	find ./deps/xz -name "aclocal.m4" -exec touch {} \;
 	find ./deps/xz -name "config.h.in" -exec touch {} \;
-	cd ./deps/xz && make clean || true && ./configure --prefix=$(PWD)/install --disable-nls --disable-maintainer-mode && make -j1 && make install
+	cd ./deps/xz && make clean || true && ./configure --prefix=$(PWD)/install --disable-nls && find . -name "Makefile.in" -exec touch {} \; && make -j1 AUTOMAKE=true ACLOCAL=true AUTOCONF=true AUTOHEADER=true && make install
 	cd ./deps/bzip2 && make clean || true && make libbz2.a
 	cd ./deps/htslib && make clean || true && make libhts.a
 
