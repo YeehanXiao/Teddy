@@ -1,0 +1,25 @@
+{
+  "runMinimapLR_full.samples": [
+    "sample_1",
+    "sample_2"
+  ],
+  "runMinimapLR_full.platform": "ont_cdna",
+
+  "runMinimapLR_full.fastqdir": "/path/to/input_fastq",
+  "runMinimapLR_full.readSuffix": ".fastq.gz",
+  "runMinimapLR_full.bamSuffix": ".bam",
+
+  "runMinimapLR_full.ref_fa": "/path/to/reference.fa",
+  "runMinimapLR_full.index": "/path/to/reference.mmi",
+
+  "runMinimapLR_full.do_map": true,
+  "runMinimapLR_full.do_use": false,
+  "runMinimapLR_full.is_paired": false,
+
+  "runMinimapLR_full.threads": 16,
+  "runMinimapLR_full.index_dir": "/path/to/minimap2_index_dir",
+
+  "runMinimapLR_full.outputs": "/path/to/output",
+  "runMinimapLR_full.out_bamdir": "/path/to/output/map_bam",
+  "runMinimapLR_full.rmpath": "/path/to/output/rmdup_bam"
+}

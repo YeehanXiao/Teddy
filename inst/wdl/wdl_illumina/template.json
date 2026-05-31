@@ -1,0 +1,16 @@
+{
+  "runSTAR.index": "/path/to/STAR/index",
+  "runSTAR.bamdir": "/path/to/output/bam",
+  "runSTAR.samples": [
+    "sample_1",
+    "sample_2"
+  ],
+  "runSTAR.threads": 8,
+  "runSTAR.inputs": "/path/to/fastq",
+  "runSTAR.GTF": "/path/to/annotation.gtf",
+  "runSTAR.countpath": "/path/to/output/counts",
+  "runSTAR.bwpath": "/path/to/output/bigwig",
+  "runSTAR.sortpath": "/path/to/output/sorted_bam",
+  "runSTAR.picardpath": "/path/to/picard.jar",
+  "runSTAR.rmpath": "/path/to/output/rmdup_bam"
+}
