@@ -33,7 +33,6 @@ pcmFunction <- function(pcm){
 #' @param filter A non-negative integer specifying the threshold of matches present for a TE-chimeric transcripts. This allows for filtering out transcripts with a low number of significant motif matches, focusing the analysis on more likely candidates. Default is 0.
 #' @importFrom GenomicRanges findOverlaps
 #' @importFrom Biostrings getSeq matchPWM
-#' @import BSgenome.Mmusculus.UCSC.mm10
 #' @export
 MotifSearch <- function(object,
                         te,
