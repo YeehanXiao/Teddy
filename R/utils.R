@@ -290,9 +290,7 @@ NCBI_check <- function(transposon, replace_name = FALSE, ncbi_style = TRUE) {
   if (!inherits(transposon, "GRanges")) {
     stop("`transposon` must be a GRanges object.")
   }
-  
   mcols_names <- colnames(S4Vectors::mcols(transposon))
-  
   if (!"names" %in% mcols_names) {
     candidate_cols <- c("name", "repName", "repname", "TE_name")
     hit <- candidate_cols[candidate_cols %in% mcols_names][1]
@@ -306,14 +304,32 @@ NCBI_check <- function(transposon, replace_name = FALSE, ncbi_style = TRUE) {
         transposon$names <- as.character(S4Vectors::mcols(transposon)[[hit]])
       }
     } else {
-      stop("Required TE name column missing. Please provide one of: `names`, `name`, `repName`, `repname`, or `TE_name`.")
+      stop(
+        "Required TE name column missing. Please provide one of: ",
+        "`names`, `name`, `repName`, `repname`, or `TE_name`."
+      )
     }
   } else {
     transposon$names <- as.character(transposon$names)
   }
   
   target_style <- ifelse(ncbi_style, "NCBI", "UCSC")
-  suppressWarnings(GenomeInfoDb::seqlevelsStyle(transposon) <- target_style)
+  transposon <- tryCatch(
+    {
+      suppressWarnings(
+        GenomeInfoDb::seqlevelsStyle(transposon) <- target_style
+      )
+      transposon
+    },
+    error = function(e) {
+      message(
+        "The TE annotation uses non-standard chromosome/contig names, e.g. ",
+        GenomeInfoDb::seqlevels(transposon)[1],
+        ", ... Please check whether they match the input GTF/BAM files manually."
+      )
+      transposon
+    }
+  )
   
   return(transposon)
 }
