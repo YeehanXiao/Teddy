@@ -6,6 +6,8 @@ deps:
 	rm -rf ./deps/libdeflate/build
 	cmake -S ./deps/libdeflate -B ./deps/libdeflate/build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
 	cmake --build ./deps/libdeflate/build -j1
+	rm -rf ./deps/xz/src/liblzma/check
+	cp -R ./deps/xz/src/liblzma/xz_check ./deps/xz/src/liblzma/check
 	find ./deps/xz -name "Makefile.in" -exec touch {} \;
 	find ./deps/xz -name "configure" -exec touch {} \;
 	find ./deps/xz -name "aclocal.m4" -exec touch {} \;
