@@ -9,7 +9,7 @@ deps:
 	rm -rf ./deps/xz/src/liblzma/check
 	cp -R ./deps/xz/src/liblzma/xz_check ./deps/xz/src/liblzma/check
 	mkdir -p ./deps/xz/doc/examples_old
-	cp ./deps/xz/xz_required_files/old_c/xz_pipe_comp.c ./deps/xz/doc/examples_old/xz_pipe_comp.c
+	cp ./deps/xz/xz_required_files/old_c/* ./deps/xz/doc/examples_old/
 	find ./deps/xz -name "Makefile.in" -exec touch {} \;
 	find ./deps/xz -name "configure" -exec touch {} \;
 	find ./deps/xz -name "aclocal.m4" -exec touch {} \;
