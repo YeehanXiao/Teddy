@@ -227,15 +227,18 @@ gffcompareAnno <- function(reference, gtffile, outfile, params = "",
 #' @importFrom GenomicRanges strand
 #' @importFrom IRanges findOverlaps
 #' @importFrom S4Vectors subjectHits queryHits mcols
-#' @importFrom txdbmaker makeTxDbFromGRanges
 #' @export
 prepareAnno <- function(gtffile, singleGens = TRUE, transposon = NULL, minoverlap = 10,  cores = 4) {
   gtfGr <- rtracklayer::import.gff(con = gtffile)
   message("Remove transcripts missing strand information.")
   gtfGr <- gtfGr[!GenomicRanges::strand(gtfGr) == "*"]
-  txdb <- suppressWarnings(
-    txdbmaker::makeTxDbFromGRanges(gr = gtfGr)
-  )
+  txdb <- suppressWarnings({
+    if (requireNamespace("txdbmaker", quietly = TRUE)) {
+      txdbmaker::makeTxDbFromGRanges(gr = gtfGr)
+    } else {
+      GenomicFeatures::makeTxDbFromGRanges(gr = gtfGr)
+    }
+  })
   exonicParts <- GenomicFeatures::exonicParts(txdb = txdb, 
                                               linked.to.single.gene.only = singleGens)
   exonrank <- split(x = exonicParts$exonic_part, 
