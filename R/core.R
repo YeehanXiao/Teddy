@@ -585,8 +585,8 @@ ChimericDrivenTest <- function(SEobject,
 }
 
 
-#' @title Extract the result from the differentially expressed TE-chimeric exon test 
-#' @param object An object of DE TE-chimeric exon test, out from \bold{ChimericDrivenTest}.
+#' @title Extract results from the differential TE-bin usage test
+#' @param object An object from \bold{ChimericDrivenTest}.
 #' @param filter Logical. If \code{TRUE} (default), filter out features with \code{NA} adjusted p-values
 #' and features flagged as structural zeros (\code{allZero}).
 #' @export
@@ -613,8 +613,8 @@ extractTest <- function(object, filter = TRUE) {
   }
   
   S4Vectors::mcols(LRTout)[1:5, 1] <- "input"
-  S4Vectors::mcols(LRTout)[1:5, 2] <- c("TranscriptID", "ExonID", "Expression of the exon",
-                                        "TEclass", "Dispersion estimate among the transcript")
+  S4Vectors::mcols(LRTout)[1:5, 2] <- c("GeneID", "BinID", "Mean normalized count of the tested TE-bin feature",
+                                        "TEclass", "Dispersion estimate")
   LRTout
 }
 
