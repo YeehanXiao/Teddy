@@ -330,7 +330,6 @@ NCBI_check <- function(transposon, replace_name = FALSE, ncbi_style = TRUE) {
       transposon
     }
   )
-  
   return(transposon)
 }
 
@@ -623,6 +622,49 @@ buildIsoformPresence <- function(trackingFiles,
   support_tbl
 }
 
+
+## Internal helper: rebuild GRanges in the current Bioconductor environment.
+## This avoids cross-version Seqinfo class issues in serialized GRanges objects.
+.cleanGRanges <- function(gr) {
+  if (!inherits(gr, "GRanges")) {
+    stop("Input must be a GRanges object.")
+  }
+  
+  out <- GenomicRanges::GRanges(
+    seqnames = as.character(GenomicRanges::seqnames(gr)),
+    ranges = IRanges::IRanges(
+      start = GenomicRanges::start(gr),
+      end   = GenomicRanges::end(gr)
+    ),
+    strand = as.character(GenomicRanges::strand(gr))
+  )
+  
+  S4Vectors::mcols(out) <- S4Vectors::mcols(gr)
+  out
+}
+
+
+## Internal helper: validate and repair combineSE metadata.
+.checkCombineSE <- function(combineSE) {
+  if (!inherits(combineSE, "SummarizedExperiment")) {
+    stop("`combineSE` must be a SummarizedExperiment object.")
+  }
+  
+  se_meta <- S4Vectors::metadata(combineSE)
+  
+  if (is.null(se_meta$gtf)) {
+    stop("`metadata(combineSE)$gtf` is missing.")
+  }
+  
+  if (!inherits(se_meta$gtf, "GRanges")) {
+    stop("`metadata(combineSE)$gtf` must be a GRanges object.")
+  }
+  
+  se_meta$gtf <- .cleanGRanges(se_meta$gtf)
+  S4Vectors::metadata(combineSE) <- se_meta
+  
+  combineSE
+}
 mapGeneName <- function(group_id, GTF) {
   gtf_df <- as.data.frame(GTF)
   map <- unique(gtf_df[, c("gene_id", "gene_name")])

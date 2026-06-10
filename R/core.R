@@ -334,7 +334,7 @@ stringtieCombine <- function(reference = NULL, bamFiles = NULL, gtfFiles = NULL,
   
   ## step 4: Create SummarizedExperiment object
   SE <- do.call(cbind, SElist)
-  S4Vectors::metadata(SE) <- list(gtf = gtfGR)
+  S4Vectors::metadata(SE) <- list(gtf = .cleanGRanges(gtfGR))
   
   return(SE)
 }
@@ -697,9 +697,10 @@ processGTF <- function(te, gtfPath = NULL, combineSE = NULL,
                        minoverlap = 0, threads = 9) {
   
   if (!is.null(combineSE)) {
+    combineSE <- .checkCombineSE(combineSE)
     GTF <- S4Vectors::metadata(combineSE)$gtf
   } else if (!is.null(gtfPath)) {
-    GTF <- rtracklayer::import(gtfPath)
+    GTF <- .cleanGRanges(rtracklayer::import(gtfPath))
   } else {
     stop("Please provide either a gtfPath or a combineSE object.")
   }
@@ -780,12 +781,6 @@ processGTF <- function(te, gtfPath = NULL, combineSE = NULL,
     recursive = FALSE,
     use.names = TRUE
   )
-  
-  ## Drop genome tags before seqinfo merging.
-  ## This avoids failures when imported GRanges objects carry invalid
-  ## genome labels, while preserving seqlevels and ranges unchanged.
-  GenomeInfoDb::genome(GTF) <- NA_character_
-  GenomeInfoDb::genome(te) <- NA_character_
   
   if (length(intersect(GenomeInfoDb::seqlevels(GTF), GenomeInfoDb::seqlevels(te))) == 0) {
     stop(
