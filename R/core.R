@@ -300,10 +300,11 @@ stringtieCombine <- function(reference = NULL, bamFiles = NULL, gtfFiles = NULL,
   if (is.null(reference)) stop("Please provide the reference annotation file.")
   if (is.null(bamFiles) || is.null(gtfFiles)) stop("Please provide both `bamFiles` and `gtfFiles`.")
   if (length(bamFiles) != length(gtfFiles)) stop("`bamFiles` and `gtfFiles` must have the same length.")
-
-  ## step 1: Re-quantify with -e (overwrite requested) - parallel version
+  
+  ## step 1: Re-quantify with -e
   rq_params <- paste("-e", params)
   message("Re-quantifying transcript abundance using ", cores, " core(s)...")
+  
   parallel::mclapply(seq_along(bamFiles), function(i) {
     Teddy::stringtieAssembly(
       bam       = bamFiles[i],
@@ -313,25 +314,30 @@ stringtieCombine <- function(reference = NULL, bamFiles = NULL, gtfFiles = NULL,
       longRead  = longRead
     )
   }, mc.cores = cores)
-
+  
   ## step 2: Preprocess gtf
   gtfGR <- rtracklayer::import.gff(reference)
   index <- which(gtfGR$type == "transcript")
-  gtfGR$gene_name <- rep(gtfGR$gene_name[index], c(index[2:length(index)], length(gtfGR) + 1) - index)
+  gtfGR$gene_name <- rep(
+    gtfGR$gene_name[index],
+    c(index[2:length(index)], length(gtfGR) + 1) - index
+  )
   gtfGR$gene_name <- ifelse(is.na(gtfGR$gene_name), gtfGR$gene_id, gtfGR$gene_name)
   transcriptGR <- gtfGR[index]
-
+  
   ## step 3: Extract quantification results
-  SElist <- lapply(X = gtfFiles,
-                   FUN = .ExtractTranscript,
-                   transcriptGR = transcriptGR)
-
+  SElist <- lapply(
+    X = gtfFiles,
+    FUN = .ExtractTranscript,
+    transcriptGR = transcriptGR
+  )
+  
   ## step 4: Create SummarizedExperiment object
-  SE <- do.call(IRanges::cbind, SElist)
+  SE <- do.call(cbind, SElist)
   S4Vectors::metadata(SE) <- list(gtf = gtfGR)
+  
   return(SE)
 }
-
 
 #' @title Counting reads on exon bins
 #' @description Count reads overlapping exon bins defined in the flattened GTF/GFF object.
@@ -665,9 +671,6 @@ calculateFoldchange <- function(object,
 
 
 
-
-
-
 #' Process GTF and SummarizedExperiment for TE overlap analysis
 #'
 #' This function processes a GTF file or a SummarizedExperiment object to identify overlaps with transposable elements (TE).
@@ -687,6 +690,7 @@ calculateFoldchange <- function(object,
 #' @import GenomicRanges
 #' @importFrom rtracklayer import
 #' @importFrom S4Vectors queryHits subjectHits
+#' @importFrom GenomeInfoDb genome seqlevels
 #' 
 #' @export
 processGTF <- function(te, gtfPath = NULL, combineSE = NULL,
@@ -777,6 +781,20 @@ processGTF <- function(te, gtfPath = NULL, combineSE = NULL,
     use.names = TRUE
   )
   
+  ## Drop genome tags before seqinfo merging.
+  ## This avoids failures when imported GRanges objects carry invalid
+  ## genome labels, while preserving seqlevels and ranges unchanged.
+  GenomeInfoDb::genome(GTF) <- NA_character_
+  GenomeInfoDb::genome(te) <- NA_character_
+  
+  if (length(intersect(GenomeInfoDb::seqlevels(GTF), GenomeInfoDb::seqlevels(te))) == 0) {
+    stop(
+      "No common seqlevels between GTF and TE annotations. ",
+      "Please check chromosome naming style, e.g. 'chr1' versus '1'."
+    )
+  }
+  
+  
   overlaps <- GenomicRanges::findOverlaps(GTF, te, minoverlap = minoverlap)
   
   if (length(overlaps) == 0) {
@@ -796,11 +814,20 @@ processGTF <- function(te, gtfPath = NULL, combineSE = NULL,
   )
   repeats <- lapply(repeats, function(x) paste(unique(x), collapse = ","))
   
+  family <- split(
+    x = as.character(S4Vectors::mcols(te)$family[S4Vectors::subjectHits(overlaps)]),
+    f = S4Vectors::queryHits(overlaps)
+  )
+  family <- lapply(family, function(x) paste(unique(x), collapse = ","))
+  
   S4Vectors::mcols(GTF)$TE_name <- "none"
   S4Vectors::mcols(GTF)$TE_name[as.integer(names(repeats))] <- unlist(repeats)
   
   S4Vectors::mcols(GTF)$TE_class <- "none"
   S4Vectors::mcols(GTF)$TE_class[as.integer(names(class))] <- unlist(class)
+  
+  S4Vectors::mcols(GTF)$TE_family <- "none"
+  S4Vectors::mcols(GTF)$TE_family[as.integer(names(family))] <- unlist(family)
   
   CHI_GTF <- GTF[S4Vectors::mcols(GTF)$TE_name != "none"]
   
