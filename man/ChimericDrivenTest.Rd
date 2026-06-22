@@ -11,7 +11,10 @@ ChimericDrivenTest(
   maxit = 100,
   niter = 10,
   quiet = FALSE,
-  warning = FALSE
+  warning = FALSE,
+  parallel = TRUE,
+  workers = 8,
+  filterAllZero = FALSE
 )
 }
 \arguments{
@@ -21,13 +24,19 @@ ChimericDrivenTest(
 
 \item{annotation}{The genome annotation object, out from \bold{prepareAnno}.}
 
-\item{maxit}{control parameter: maximum number of iterations to allow for convergence when calculating dispersion.}
+\item{maxit}{Control parameter: maximum number of iterations to allow for convergence when calculating dispersion.}
 
-\item{niter}{whether to print messages at each step}
+\item{niter}{Number of times to iterate between estimation of means and estimation of dispersion.}
 
-\item{quiet}{number of times to iterate between estimation of means and estimation of dispersion}
+\item{quiet}{Whether to suppress messages at each step.}
 
-\item{warning}{whether to print warning at each step}
+\item{warning}{Whether to print warnings at each step.}
+
+\item{parallel}{Logical, whether to run parallel computation.}
+
+\item{workers}{Integer, number of workers used when \code{parallel = TRUE}.}
+
+\item{filterAllZero}{Logical, whether to remove all-zero rows before fitting the DESeq2 model.}
 }
 \description{
 Detect to what extent TE-chimeric exon affect the expression of the corresponding transcript
