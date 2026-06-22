@@ -483,7 +483,7 @@ countAnno <- function(annotation, bamfile,
 #' @param filterAllZero Logical, whether to remove all-zero rows before fitting the DESeq2 model.
 #'
 #' @import SummarizedExperiment
-#' @import DESeq2
+#' @importFrom DESeq2 DESeqDataSet estimateSizeFactorsForMatrix estimateDispersionsGeneEst estimateDispersionsFit estimateDispersionsPriorVar estimateDispersionsMAP nbinomLRT
 #' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
 #' @importFrom MatrixGenerics rowVars
 #' @importFrom BiocParallel bplapply MulticoreParam SerialParam
@@ -667,8 +667,8 @@ ChimericDrivenTest <- function(SEobject,
   
   .msg("Building model matrices")
   
-  fullModelM <- DESeq2:::rmDepCols(model.matrix(design, modelInfo))
-  reducedModelM <- DESeq2:::rmDepCols(model.matrix(reducedModel, modelInfo))
+  fullModelM <- rmDepCols(model.matrix(design, modelInfo))
+  reducedModelM <- rmDepCols(model.matrix(reducedModel, modelInfo))
   
   .msg("Estimating gene-wise dispersions")
   
@@ -682,7 +682,7 @@ ChimericDrivenTest <- function(SEobject,
   
   .msg("Fitting dispersion trend")
   
-  chi_dds <- DESeq2::estimateDispersionsFit(
+  chi_dds <- estimateDispersionsFit(
     chi_dds,
     fitType = "parametric",
     minDisp = 1e-08,
@@ -691,7 +691,7 @@ ChimericDrivenTest <- function(SEobject,
   
   .msg("Estimating dispersion prior variance")
   
-  dispersion_priorvar <- DESeq2::estimateDispersionsPriorVar(
+  dispersion_priorvar <- estimateDispersionsPriorVar(
     chi_dds,
     minDisp = 1e-08,
     modelMatrix = fullModelM
@@ -699,7 +699,7 @@ ChimericDrivenTest <- function(SEobject,
   
   .msg("Estimating MAP dispersions")
   
-  chi_dds <- DESeq2::estimateDispersionsMAP(
+  chi_dds <- estimateDispersionsMAP(
     chi_dds,
     dispPriorVar = dispersion_priorvar,
     modelMatrix = fullModelM
@@ -707,7 +707,7 @@ ChimericDrivenTest <- function(SEobject,
   
   .msg("Running nbinomLRT")
   
-  chi_test <- DESeq2::nbinomLRT(
+  chi_test <- nbinomLRT(
     chi_dds,
     reduced = reducedModelM,
     full = fullModelM,
