@@ -1,7 +1,6 @@
-# Extract the result from the differentially expressed TE-chimeric exon test
+# Extract results from the differential TE-bin usage test
 
-Extract the result from the differentially expressed TE-chimeric exon
-test
+Extract results from the differential TE-bin usage test
 
 ## Usage
 
@@ -13,8 +12,7 @@ extractTest(object, filter = TRUE)
 
 - object:
 
-  An object of DE TE-chimeric exon test, out from
-  **ChimericDrivenTest**.
+  An object from **ChimericDrivenTest**.
 
 - filter:
 

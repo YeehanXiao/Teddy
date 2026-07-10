@@ -35,7 +35,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/core-workflow.html">Tutorial for TEDDY Core Workflow</a></li>
-    <li><a class="dropdown-item" href="../articles/downstream-analysis.html">Tutorial for downstream analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/downstream-analysis.html">Tutorial for Downstream Analysis</a></li>
   </ul>
 </li>
       </ul>
@@ -140,14 +140,14 @@ column for downstream annotation.</p>
 <code class="sourceCode R"><span><span class="co">#Choose one matching your genome build.</span></span>
 <span><span class="co">## Human hg38</span></span>
 <span><span class="co">#download.file(</span></span>
-<span>  <span class="co">#url = "https://zenodo.org/records/17595702/files/hg38_TE_annotation.rds?download=1",</span></span>
+<span>  <span class="co">#url = "https://zenodo.org/records/21301845/files/hg38_TE.rds?download=1",</span></span>
 <span>  <span class="co">#destfile = te_file,</span></span>
 <span>  <span class="co">#mode = "wb"</span></span>
 <span><span class="co">#)</span></span>
 <span></span>
 <span><span class="co">## Mouse mm10</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span></span>
-<span>  url <span class="op">=</span> <span class="st">"https://zenodo.org/records/17595702/files/mm10_TE_annotation.rds?download=1"</span>,</span>
+<span>  url <span class="op">=</span> <span class="st">"https://zenodo.org/records/21301845/files/mm10_TE.rds?download=1"</span>,</span>
 <span>  destfile <span class="op">=</span> <span class="va">te_file</span>,</span>
 <span>  mode <span class="op">=</span> <span class="st">"wb"</span></span>
 <span><span class="op">)</span></span>
@@ -356,8 +356,7 @@ transcript structures.</p>
 <span>  params <span class="op">=</span> <span class="st">"-p 8"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The merged GTF file is written to:</p>
-<pre class="text"><code><span></span>
-<span><span class="va">short_read_teddy_output</span><span class="op">/</span><span class="va">GTF</span><span class="op">/</span><span class="va">merged.gtf</span></span></code></pre>
+<pre class="text"><code><span><span class="va">short_read_teddy_output</span><span class="op">/</span><span class="va">GTF</span><span class="op">/</span><span class="va">merged.gtf</span></span></code></pre>
 <p><strong>Notes</strong></p>
 <p>The <code>params</code> argument passes additional options to
 StringTie merge mode. In the example above, <code>params = "-p 8"</code>
@@ -476,6 +475,7 @@ TE-chimeric exons.</li>
 <div class="section level2">
 <h2 id="transcript-level-expression-and-quantification">5. Transcript-level expression and quantification<a class="anchor" aria-label="anchor" href="#transcript-level-expression-and-quantification"></a>
 </h2>
+<p><img src="../reference/figures/exon_chain.png" alt="Example exon-chain structure plot" width="88%"></p>
 <div class="section level3">
 <h3 id="transcript-level-quantification">5.1 Transcript-level quantification<a class="anchor" aria-label="anchor" href="#transcript-level-quantification"></a>
 </h3>
@@ -538,6 +538,7 @@ colData: sample information</code></pre>
 <div class="section level2">
 <h2 id="bin-level-expression-and-quantification">6. Bin-level expression and quantification<a class="anchor" aria-label="anchor" href="#bin-level-expression-and-quantification"></a>
 </h2>
+<p><img src="../reference/figures/bin_structure.png" alt="Example bin-level structure plot" width="88%"></p>
 <div class="section level3">
 <h3 id="bin-level-quantification">6.1 Bin-level quantification<a class="anchor" aria-label="anchor" href="#bin-level-quantification"></a>
 </h3>
@@ -761,9 +762,12 @@ the isoform support matrix to TE-chimeric transcripts.</p>
   TCONS_00001 ENSG00000123456  ENST00000123456 TRUE     TRUE  FALSE
   TCONS_00002 MSTRG.12         MSTRG.12.1      TRUE     FALSE TRUE
   TCONS_00003 ENSG00000234567  ENST00000234567 FALSE    TRUE  TRUE</code></pre>
-<p><strong>Notes</strong> - The resulting object can be used for
-downstream platform-overlap summaries, TE-chimeric transcript recovery
-analysis, and visualization.</p>
+<p><strong>Notes</strong></p>
+<ul>
+<li>The resulting object can be used for downstream platform-overlap
+summaries, TE-chimeric transcript recovery analysis, and
+visualization.</li>
+</ul>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

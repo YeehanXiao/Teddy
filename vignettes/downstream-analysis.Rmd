@@ -1,8 +1,8 @@
 ---
-title: "Tutorial for downstream analysis"
+title: "Tutorial for Downstream Analysis"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Tutorial for downstream analysis}
+  %\VignetteIndexEntry{Tutorial for Downstream Analysis}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -13,7 +13,8 @@ ChimericDrivenTest(
   maxit = 100,
   niter = 10,
   quiet = FALSE,
-  warning = FALSE
+  warning = FALSE,
+  filterAllZero = FALSE
 )
 ```
 
@@ -33,18 +34,23 @@ ChimericDrivenTest(
 
 - maxit:
 
-  control parameter: maximum number of iterations to allow for
+  Control parameter: maximum number of iterations to allow for
   convergence when calculating dispersion.
 
 - niter:
 
-  whether to print messages at each step
+  Number of times to iterate between estimation of means and estimation
+  of dispersion.
 
 - quiet:
 
-  number of times to iterate between estimation of means and estimation
-  of dispersion
+  Whether to suppress messages at each step.
 
 - warning:
 
-  whether to print warning at each step
+  Whether to print warnings at each step.
+
+- filterAllZero:
+
+  Logical, whether to remove all-zero rows before fitting the DESeq2
+  model.

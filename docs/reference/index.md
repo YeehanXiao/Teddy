@@ -28,8 +28,7 @@
 - [`ChimericDrivenTest()`](https://yeehanxiao.github.io/Teddy/reference/ChimericDrivenTest.md)
   : Testing for differential TE-chimeric exon usage
 - [`extractTest()`](https://yeehanxiao.github.io/Teddy/reference/extractTest.md)
-  : Extract the result from the differentially expressed TE-chimeric
-  exon test
+  : Extract results from the differential TE-bin usage test
 - [`calculateFoldchange()`](https://yeehanxiao.github.io/Teddy/reference/calculateFoldchange.md)
   : Calculating the fold change
 - [`pick_canonical_tx()`](https://yeehanxiao.github.io/Teddy/reference/pick_canonical_tx.md)

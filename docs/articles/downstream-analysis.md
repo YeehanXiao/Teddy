@@ -1,4 +1,4 @@
-# Tutorial for downstream analysis
+# Tutorial for Downstream Analysis
 
 This tutorial introduces the downstream analysis modules available in
 TEDDY. It requires output objects generated from the [core workflow

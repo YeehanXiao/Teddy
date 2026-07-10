@@ -89,14 +89,14 @@ te_file <- file.path(work_dir, "meta", "te_annotation.rds")
 #Choose one matching your genome build.
 ## Human hg38
 #download.file(
-  #url = "https://zenodo.org/records/17595702/files/hg38_TE_annotation.rds?download=1",
+  #url = "https://zenodo.org/records/21301845/files/hg38_TE.rds?download=1",
   #destfile = te_file,
   #mode = "wb"
 #)
 
 ## Mouse mm10
 download.file(
-  url = "https://zenodo.org/records/17595702/files/mm10_TE_annotation.rds?download=1",
+  url = "https://zenodo.org/records/21301845/files/mm10_TE.rds?download=1",
   destfile = te_file,
   mode = "wb"
 )

@@ -86,14 +86,14 @@ te_file <- file.path(work_dir, "meta", "te_annotation.rds")
 #Choose one matching your genome build.
 ## Human hg38
 #download.file(
-  #url = "https://zenodo.org/records/17595702/files/hg38_TE_annotation.rds?download=1",
+  #url = "https://zenodo.org/records/21301845/files/hg38_TE.rds?download=1",
   #destfile = te_file,
   #mode = "wb"
 #)
 
 ## Mouse mm10
 download.file(
-  url = "https://zenodo.org/records/17595702/files/mm10_TE_annotation.rds?download=1",
+  url = "https://zenodo.org/records/21301845/files/mm10_TE.rds?download=1",
   destfile = te_file,
   mode = "wb"
 )
@@ -335,7 +335,6 @@ stringtieMerge(
 The merged GTF file is written to:
 
 ``` text
-
 short_read_teddy_output/GTF/merged.gtf
 ```
 
@@ -467,6 +466,9 @@ GRanges object with 5 ranges and 8 metadata columns:
 
 ## 5. Transcript-level expression and quantification
 
+![Example exon-chain structure
+plot](../reference/figures/exon_chain.png)
+
 ### 5.1 Transcript-level quantification
 
 TEDDY uses
@@ -541,6 +543,9 @@ colData: sample information
 ```
 
 ## 6. Bin-level expression and quantification
+
+![Example bin-level structure
+plot](../reference/figures/bin_structure.png)
 
 ### 6.1 Bin-level quantification
 
@@ -802,6 +807,8 @@ Example output:
   TCONS_00003 ENSG00000234567  ENST00000234567 FALSE    TRUE  TRUE
 ```
 
-**Notes** - The resulting object can be used for downstream
-platform-overlap summaries, TE-chimeric transcript recovery analysis,
-and visualization.
+**Notes**
+
+- The resulting object can be used for downstream platform-overlap
+  summaries, TE-chimeric transcript recovery analysis, and
+  visualization.
