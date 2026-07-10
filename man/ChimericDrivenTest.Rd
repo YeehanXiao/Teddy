@@ -12,8 +12,6 @@ ChimericDrivenTest(
   niter = 10,
   quiet = FALSE,
   warning = FALSE,
-  parallel = TRUE,
-  workers = 8,
   filterAllZero = FALSE
 )
 }
@@ -31,10 +29,6 @@ ChimericDrivenTest(
 \item{quiet}{Whether to suppress messages at each step.}
 
 \item{warning}{Whether to print warnings at each step.}
-
-\item{parallel}{Logical, whether to run parallel computation.}
-
-\item{workers}{Integer, number of workers used when \code{parallel = TRUE}.}
 
 \item{filterAllZero}{Logical, whether to remove all-zero rows before fitting the DESeq2 model.}
 }

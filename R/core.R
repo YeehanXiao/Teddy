@@ -478,15 +478,12 @@ countAnno <- function(annotation, bamfile,
 #' @param niter Number of times to iterate between estimation of means and estimation of dispersion.
 #' @param quiet Whether to suppress messages at each step.
 #' @param warning Whether to print warnings at each step.
-#' @param parallel Logical, whether to run parallel computation.
-#' @param workers Integer, number of workers used when \code{parallel = TRUE}.
 #' @param filterAllZero Logical, whether to remove all-zero rows before fitting the DESeq2 model.
 #'
 #' @import SummarizedExperiment
 #' @importFrom DESeq2 DESeqDataSet estimateSizeFactorsForMatrix estimateDispersionsGeneEst estimateDispersionsFit estimateDispersionsPriorVar estimateDispersionsMAP nbinomLRT
 #' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
 #' @importFrom MatrixGenerics rowVars
-#' @importFrom BiocParallel bplapply MulticoreParam SerialParam
 #'
 #' @export
 
@@ -497,181 +494,174 @@ ChimericDrivenTest <- function(SEobject,
                                niter = 10,
                                quiet = FALSE,
                                warning = FALSE,
-                               parallel = TRUE,
-                               workers = 8,
                                filterAllZero = FALSE) {
+  old_warn <- getOption("warn")
+
   if (!warning) {
     options(warn = -1)
+    on.exit(options(warn = old_warn), add = TRUE)
   }
-  
-  if (parallel) {
-    bp <- BiocParallel::MulticoreParam(workers = workers)
-  } else {
-    bp <- BiocParallel::SerialParam()
-  }
-  
+
   .msg <- function(...) {
     if (!quiet) {
       message("[", Sys.time(), "] ", ...)
     }
   }
-  
+
   if (is.null(condition)) {
     stop("Please set the condition for the SummarizedExperiment object.")
   }
-  
+
   if (is.null(SEobject@assays@data[["counts"]])) {
     stop("The count in the SummarizedExperiment object is needed.")
   }
-  
+
   if (is.null(annotation)) {
     annotation <- rowRanges(SEobject)
   }
-  
+
   design <- formula(x = "~ sample + chimeric + condition:chimeric")
   reducedModel <- formula(x = "~ sample + chimeric")
-  
+
   colData(SEobject)$condition <- condition
   mcols(SEobject)$chimeric <- annotation$transposon
-  
+
   meta <- as.data.frame(mcols(SEobject))
   sampleInfo <- colData(SEobject)
-  
+
   featureID <- sprintf("E%3.3d", meta$exonic_part)
   groupID <- as.character(meta$gene_id)
-  transcripts <- as.list(meta$tx_name)
   count <- as.matrix(SEobject@assays@data[["counts"]])
-  
-  Nrow <- nrow(count)
-  
-  if (length(groupID) != Nrow) {
+
+  if (length(groupID) != nrow(count)) {
     stop(
       "The length of 'groupID' must be the same as the number of rows in count matrix!",
       call. = FALSE
     )
   }
-  
-  if (length(featureID) != Nrow) {
+
+  if (length(featureID) != nrow(count)) {
     stop(
       "The length of 'featureID' parameter must be the same as the number of rows of countData!",
       call. = FALSE
     )
   }
-  
+
   modelInfo <- cbind.data.frame(sample = rownames(sampleInfo), sampleInfo)
-  
+
   modelInfo <- rbind.data.frame(
     cbind(modelInfo, chimeric = "chimeric"),
     cbind(modelInfo, chimeric = "others")
   )
-  
+
   rownames(modelInfo) <- NULL
-  
+
   vars <- all.vars(design)
-  
+
   if (any(!vars %in% colnames(modelInfo))) {
     stop("The variable 'sample' in the design formula is not in the 'modelInfo'!")
   }
-  
+
   .msg("Selecting genes with TE-chimeric exons")
-  
+
   gene_exons <- split(seq_len(nrow(count)), as.character(groupID))
-  
+
   identify_chimeric <- unlist(lapply(gene_exons, function(i) {
-    subchimeric <- meta$chimeric[i]
-    ifelse(any(subchimeric != "none"), TRUE, FALSE)
+    any(meta$chimeric[i] != "none")
   }))
-  
+
   chiobject <- SEobject[unlist(gene_exons[identify_chimeric]), ]
-  
+
   chi_meta <- as.data.frame(mcols(chiobject))
   chi_featureID <- sprintf("E%3.3d", chi_meta$exonic_part)
   chi_groupID <- as.character(chi_meta$gene_id)
   chi_TEclass <- as.character(chi_meta$chimeric)
-  chi_transcripts <- as.list(chi_meta$tx_name)
   chi_count <- as.matrix(chiobject@assays@data[["counts"]])
-  
+
   rownames(chi_count) <- paste(chi_groupID, chi_featureID, sep = ":")
-  
-  chi_Nrow <- nrow(chi_count)
+
   chi_gene_exons <- split(seq_len(nrow(chi_count)), as.character(chi_groupID))
-  
+
   .msg("Building chimeric-vs-others count matrix")
-  
-  others <- BiocParallel::bplapply(chi_gene_exons, function(i) {
+
+  others <- lapply(chi_gene_exons, function(i) {
     transposon <- chi_meta$chimeric[i]
-    
+
     chi_idx <- which(transposon != "none")
-    subSE <- chi_count[i, , drop = FALSE]
     other_idx <- which(transposon == "none")
-    
+    subSE <- chi_count[i, , drop = FALSE]
+
     sumothers <- t(vapply(
-      seq(length(chi_idx)),
-      function(r) colSums(subSE[other_idx, , drop = FALSE]),
-      numeric(dim(subSE)[2])
+      seq_along(chi_idx),
+      function(r) {
+        colSums(subSE[other_idx, , drop = FALSE])
+      },
+      numeric(ncol(subSE))
     ))
-    
+
     rownames(sumothers) <- rownames(subSE)[chi_idx]
-    
+
     sumothers
-  }, BPPARAM = bp)
-  
+  })
+
   others <- do.call(rbind, others)
-  
+
   chi_exon_ids <- chi_meta$chimeric != "none"
   chimeric <- chi_count[chi_exon_ids, , drop = FALSE]
-  
+
   finalcount <- cbind(chimeric, others)
-  
+
   chi_se <- SummarizedExperiment(finalcount, colData = modelInfo)
-  
+
   mcols(chi_se)$featureID <- chi_featureID[chi_exon_ids]
   mcols(chi_se)$groupID <- chi_groupID[chi_exon_ids]
   mcols(chi_se)$TEclass <- chi_TEclass[chi_exon_ids]
   mcols(chi_se)$exonBaseMean <- rowMeans(finalcount)
   mcols(chi_se)$exonBaseVar <- rowVars(finalcount)
-  
+
   .msg("Estimating size factors")
-  
+
   normFactors <- estimateSizeFactorsForMatrix(count, median)
   chi_sizeFactors <- rep(normFactors, 2)
-  
+
   modelInfo$sizefactor <- chi_sizeFactors
-  
+
   normalizeSEcount <- function(object, sizefactors) {
     t(t(assay(object)) / sizefactors)
   }
-  
+
   allZero <- unname(
     rowSums(finalcount) == 0 |
       rowSums(
         normalizeSEcount(chi_se, chi_sizeFactors)[, modelInfo$chimeric == "others"]
       ) == 0
   )
-  
+
   mcols(chi_se)$allZero <- allZero
-  
+
   if (filterAllZero) {
     .msg("Filtering all-zero rows: ", sum(allZero), " / ", length(allZero))
     chi_se <- chi_se[!allZero, ]
   } else {
-    .msg("Keeping all rows; all-zero rows are marked only: ",
-         sum(allZero), " / ", length(allZero))
+    .msg(
+      "Keeping all rows; all-zero rows are marked only: ",
+      sum(allZero), " / ", length(allZero)
+    )
   }
-  
+
   .msg("Building DESeqDataSet")
-  
+
   chi_dds <- DESeqDataSet(chi_se, design, ignoreRank = TRUE)
-  
+
   colData(chi_dds)$sizeFactor <- chi_sizeFactors
-  
+
   .msg("Building model matrices")
-  
+
   fullModelM <- rmDepCols(model.matrix(design, modelInfo))
   reducedModelM <- rmDepCols(model.matrix(reducedModel, modelInfo))
-  
+
   .msg("Estimating gene-wise dispersions")
-  
+
   chi_dds <- DESeq2::estimateDispersionsGeneEst(
     chi_dds,
     maxit = maxit,
@@ -679,45 +669,43 @@ ChimericDrivenTest <- function(SEobject,
     modelMatrix = fullModelM,
     niter = niter
   )
-  
+
   .msg("Fitting dispersion trend")
-  
+
   chi_dds <- estimateDispersionsFit(
     chi_dds,
     fitType = "parametric",
     minDisp = 1e-08,
     quiet = quiet
   )
-  
+
   .msg("Estimating dispersion prior variance")
-  
+
   dispersion_priorvar <- estimateDispersionsPriorVar(
     chi_dds,
     minDisp = 1e-08,
     modelMatrix = fullModelM
   )
-  
+
   .msg("Estimating MAP dispersions")
-  
+
   chi_dds <- estimateDispersionsMAP(
     chi_dds,
     dispPriorVar = dispersion_priorvar,
     modelMatrix = fullModelM
   )
-  
+
   .msg("Running nbinomLRT")
-  
+
   chi_test <- nbinomLRT(
     chi_dds,
     reduced = reducedModelM,
-    full = fullModelM,
-    parallel = parallel,
-    BPPARAM = bp
+    full = fullModelM
   )
-  
+
   .msg("Done")
-  
-  return(chi_test)
+
+  chi_test
 }
 
 #' @title Extract results from the differential TE-bin usage test
