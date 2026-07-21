@@ -1,0 +1,103 @@
+  364 reference transcripts loaded.
+  2 duplicate reference transcripts discarded.
+  459 query transfrags loaded.
+Remove transcripts missing strand information.
+Using 2 cores for exon rank ordering.
+Re-quantifying transcript abundance using 2 core(s)...
+
+        ==========     _____ _    _ ____  _____  ______          _____  
+        =====         / ____| |  | |  _ \|  __ \|  ____|   /\   |  __ \ 
+          =====      | (___ | |  | | |_) | |__) | |__     /  \  | |  | |
+            ====      \___ \| |  | |  _ <|  _  /|  __|   / /\ \ | |  | |
+              ====    ____) | |__| | |_) | | \ \| |____ / ____ \| |__| |
+        ==========   |_____/ \____/|____/|_|  \_\______/_/    \_\_____/
+       Rsubread 2.22.1
+
+//========================== featureCounts setting ===========================\\
+||                                                                            ||
+||             Input files : 1 BAM file                                       ||
+||                                                                            ||
+||                           chr8_demo_biopos.bam                             ||
+||                                                                            ||
+||              Paired-end : yes                                              ||
+||        Count read pairs : yes                                              ||
+||              Annotation : R data.frame                                     ||
+||      Dir for temp files : .                                                ||
+||                 Threads : 1                                                ||
+||                   Level : feature level                                    ||
+||      Multimapping reads : counted                                          ||
+|| Multi-overlapping reads : counted                                          ||
+||   Min overlapping bases : 1                                                ||
+||                                                                            ||
+\\============================================================================//
+
+//================================= Running ==================================\\
+||                                                                            ||
+|| Load annotation file .Rsubread_UserProvidedAnnotation_pid94028 ...         ||
+||    Features : 1026                                                         ||
+||    Meta-features : 1016                                                    ||
+||    Chromosomes/contigs : 1                                                 ||
+||                                                                            ||
+|| Process BAM file chr8_demo_biopos.bam...                                   ||
+
+        ==========     _____ _    _ ____  _____  ______          _____  
+        =====         / ____| |  | |  _ \|  __ \|  ____|   /\   |  __ \ 
+          =====      | (___ | |  | | |_) | |__) | |__     /  \  | |  | |
+            ====      \___ \| |  | |  _ <|  _  /|  __|   / /\ \ | |  | |
+              ====    ____) | |__| | |_) | | \ \| |____ / ____ \| |__| |
+        ==========   |_____/ \____/|____/|_|  \_\______/_/    \_\_____/
+       Rsubread 2.22.1
+
+//========================== featureCounts setting ===========================\\
+||                                                                            ||
+||             Input files : 1 BAM file                                       ||
+||                                                                            ||
+||                           chr8_demo_bioneg.bam                             ||
+||                                                                            ||
+||              Paired-end : yes                                              ||
+||        Count read pairs : yes                                              ||
+||              Annotation : R data.frame                                     ||
+||      Dir for temp files : .                                                ||
+||                 Threads : 1                                                ||
+||                   Level : feature level                                    ||
+||      Multimapping reads : counted                                          ||
+|| Multi-overlapping reads : counted                                          ||
+||   Min overlapping bases : 1                                                ||
+||                                                                            ||
+\\============================================================================//
+
+//================================= Running ==================================\\
+||                                                                            ||
+|| Load annotation file .Rsubread_UserProvidedAnnotation_pid94029 ...         ||
+||    Features : 1026                                                         ||
+||    Meta-features : 1016                                                    ||
+||    Chromosomes/contigs : 1                                                 ||
+||                                                                            ||
+|| Process BAM file chr8_demo_bioneg.bam...                                   ||
+||    Paired-end reads are included.                                          ||
+||    Total alignments : 30698                                                ||
+||    Successfully assigned alignments : 14624 (47.6%)                        ||
+||    Running time : 0.00 minutes                                             ||
+||                                                                            ||
+|| Write the final count table.                                               ||
+|| Write the read assignment summary.                                         ||
+||                                                                            ||
+\\============================================================================//
+
+||    Paired-end reads are included.                                          ||
+||    Total alignments : 38119                                                ||
+||    Successfully assigned alignments : 22224 (58.3%)                        ||
+||    Running time : 0.00 minutes                                             ||
+||                                                                            ||
+|| Write the final count table.                                               ||
+|| Write the read assignment summary.                                         ||
+||                                                                            ||
+\\============================================================================//
+
+                           output    n
+1        TE-annotated exonic bins 1026
+2       transcript-level features  459
+3              bin-level features 1026
+4 TE-chimeric transcript features  167
+
+TEDDY demo completed successfully.

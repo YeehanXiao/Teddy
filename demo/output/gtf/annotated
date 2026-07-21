@@ -1,0 +1,30 @@
+# gffcompare v0.12.6 | Command line was:
+#/opt/homebrew/lib/R/4.5/site-library/Teddy/gffcompare -r /Users/xiaoyihan/Core/MyTools/Develop_Final/Teddy/demo/data/chr8_demo.gtf -o /Users/xiaoyihan/Core/MyTools/Develop_Final/Teddy/demo/output/GTF/.gffcompare_tmp_94004_annotated /Users/xiaoyihan/Core/MyTools/Develop_Final/Teddy/demo/output/GTF/merged.gtf
+#
+
+#= Summary for dataset: /Users/xiaoyihan/Core/MyTools/Develop_Final/Teddy/demo/output/GTF/merged.gtf 
+#     Query mRNAs :     459 in     217 loci  (301 multi-exon transcripts)
+#            (44 multi-transcript loci, ~2.1 transcripts per locus)
+# Reference mRNAs :     362 in     151 loci  (271 multi-exon)
+# Super-loci w/ reference transcripts:      150
+#-----------------| Sensitivity | Precision  |
+        Base level:   100.0     |    73.8    |
+        Exon level:    92.2     |    86.5    |
+      Intron level:   100.0     |    96.8    |
+Intron chain level:   100.0     |    90.0    |
+  Transcript level:    99.4     |    78.4    |
+       Locus level:   100.0     |    69.1    |
+
+     Matching intron chains:     271
+       Matching transcripts:     360
+              Matching loci:     151
+
+          Missed exons:       0/1013	(  0.0%)
+           Novel exons:      76/1049	(  7.2%)
+        Missed introns:       0/581	(  0.0%)
+         Novel introns:       3/600	(  0.5%)
+           Missed loci:       0/151	(  0.0%)
+            Novel loci:      67/217	( 30.9%)
+
+ Total union super-loci across all input datasets: 217 
+459 out of 459 consensus transcripts written in /Users/xiaoyihan/Core/MyTools/Develop_Final/Teddy/demo/output/GTF/.gffcompare_tmp_94004_annotated.annotated.gtf (0 discarded as redundant)
