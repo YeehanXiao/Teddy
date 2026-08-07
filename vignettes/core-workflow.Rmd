@@ -414,7 +414,7 @@ GRanges object with 5 ranges and 8 metadata columns:
 
 ## 5. Transcript-level expression and quantification
 
-<img src="../man/figures/exon_chain.png" alt="Example exon-chain structure plot" width="88%">
+<img src="../man/figures/exonchain.png" alt="Example exon-chain structure plot" width="88%">
 
 ### 5.1 Transcript-level quantification
 
@@ -482,7 +482,7 @@ colData: sample information
 
 ## 6. Bin-level expression and quantification
 
-<img src="../man/figures/bin_structure.png" alt="Example bin-level structure plot" width="88%">
+<img src="../man/figures/binstructure.png" alt="Example bin-level structure plot" width="88%">
 
 ### 6.1 Bin-level quantification
 TEDDY uses `countAnno()` to quantify reads over TE-annotated exonic bins. The output is a `SummarizedExperiment` object that stores bin-level count matrices together with the corresponding exon, transcript, gene, and TE-chimeric annotation.
