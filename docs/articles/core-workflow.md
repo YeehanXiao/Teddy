@@ -466,8 +466,7 @@ GRanges object with 5 ranges and 8 metadata columns:
 
 ## 5. Transcript-level expression and quantification
 
-![Example exon-chain structure
-plot](../reference/figures/exon_chain.png)
+![Example exon-chain structure plot](../reference/figures/exonchain.png)
 
 ### 5.1 Transcript-level quantification
 
@@ -545,7 +544,7 @@ colData: sample information
 ## 6. Bin-level expression and quantification
 
 ![Example bin-level structure
-plot](../reference/figures/bin_structure.png)
+plot](../reference/figures/binstructure.png)
 
 ### 6.1 Bin-level quantification
 

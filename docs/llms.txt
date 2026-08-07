@@ -22,26 +22,6 @@ conda install bioconda::r-teddy
 This option installs TEDDY together with its Conda-resolved package
 dependencies.
 
-Genome-specific `BSgenome` packages are not fixed dependencies of TEDDY,
-because the appropriate genome sequence depends on the species and
-genome build used in each analysis. If you use sequence extraction or
-motif-search functions, please install the corresponding `BSgenome`
-package separately.
-
-For example, for mouse mm10:
-
-``` r
-
-BiocManager::install("BSgenome.Mmusculus.UCSC.mm10")
-```
-
-For human hg38:
-
-``` r
-
-BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
-```
-
 #### Option 2: Install from source
 
 If you install TEDDY from source, please install the required R
@@ -96,7 +76,29 @@ If you are already inside the `Teddy` directory, use:
 R CMD INSTALL .
 ```
 
-### 1.2 Troubleshooting Compilation
+### 1.2 Genome-specific BSgenome packages
+
+Genome-specific `BSgenome` packages are not fixed dependencies of TEDDY,
+because the appropriate genome sequence depends on the species and
+genome build used in each analysis. If you use sequence extraction or
+motif-search functions, please install the corresponding `BSgenome`
+package separately.
+
+For example, for mouse mm10:
+
+``` r
+
+BiocManager::install("BSgenome.Mmusculus.UCSC.mm10")
+```
+
+For human hg38:
+
+``` r
+
+BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
+```
+
+### 1.3 Troubleshooting Compilation
 
 - If you encounter build errors during compilation, especially after
   switching machines or modifying source files, clean previously

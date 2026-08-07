@@ -10,5 +10,6 @@ src/deps/**/.libs/
 src/deps/**/.DS_Store
 src/deps/xz/install/
 src/deps/libdeflate/build/
-docs/
 inst/doc
+.DS_Store
+*.o

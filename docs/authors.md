@@ -10,12 +10,12 @@ Source:
 [`DESCRIPTION`](https://github.com/YeehanXiao/Teddy/blob/HEAD/DESCRIPTION)
 
 Xiao Y (2026). *Teddy: Analysis of TE-Dependent Gene Isoforms*. R
-package version 1.1.8, <https://github.com/YeehanXiao/Teddy>.
+package version 1.2.8, <https://github.com/YeehanXiao/Teddy>.
 
     @Manual{,
       title = {Teddy: Analysis of TE-Dependent Gene Isoforms},
       author = {Yihan Xiao},
       year = {2026},
-      note = {R package version 1.1.8},
+      note = {R package version 1.2.8},
       url = {https://github.com/YeehanXiao/Teddy},
     }
