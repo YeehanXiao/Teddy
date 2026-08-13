@@ -760,12 +760,16 @@ calculateFoldchange <- function(object,
   modelInfo <- colData(object)
   N_samples <- nrow(modelInfo) / 2
   disp <- DESeq2::dispersions(object)
-  disp[is.na(object)] <- 1e-6
+  disp[is.na(disp)] <- 1e-6
   chimericCounts <- counts(object)[,colData(object)$chimeric == "chimeric"]
   otherCounts <- counts(object)[,colData(object)$chimeric == "others"]
   samples <- unique(colData(object)$sample)
   mfSmall <- as.data.frame(colData(object))
-  if (!is.null(genes)) {
+  genes <- intersect(
+    genes,
+    unique(groups[findex])
+  )
+  if (length(genes) > 0L) {
     alleffects <- BiocParallel::bplapply( genes,
                             getEffectsForGene,
                             groups = groups, 
