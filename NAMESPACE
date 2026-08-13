@@ -28,49 +28,69 @@ import(SummarizedExperiment)
 import(methods)
 import(statmod)
 importClassesFrom(SummarizedExperiment,RangedSummarizedExperiment)
-importFrom(BiocParallel,MulticoreParam)
-importFrom(BiocParallel,bplapply)
-importFrom(Biostrings,DNAStringSet)
-importFrom(Biostrings,getSeq)
-importFrom(Biostrings,matchPWM)
-importFrom(Biostrings,reverseComplement)
-importFrom(Biostrings,writeXStringSet)
-importFrom(Biostrings,xscat)
-importFrom(DESeq2,DESeqDataSet)
-importFrom(DESeq2,DESeqDataSetFromMatrix)
-importFrom(DESeq2,estimateDispersionsFit)
-importFrom(DESeq2,estimateDispersionsGeneEst)
-importFrom(DESeq2,estimateDispersionsMAP)
-importFrom(DESeq2,estimateDispersionsPriorVar)
-importFrom(DESeq2,estimateSizeFactorsForMatrix)
-importFrom(DESeq2,nbinomLRT)
-importFrom(DESeq2,vst)
-importFrom(GenomeInfoDb,genome)
-importFrom(GenomeInfoDb,seqlevels)
+importFrom(BiocParallel,
+  MulticoreParam,
+  bplapply
+)
+importFrom(Biostrings,
+  DNAStringSet,
+  getSeq,
+  matchPWM,
+  reverseComplement,
+  writeXStringSet,
+  xscat
+)
+importFrom(DESeq2,
+  DESeqDataSet,
+  DESeqDataSetFromMatrix,
+  estimateDispersionsFit,
+  estimateDispersionsGeneEst,
+  estimateDispersionsMAP,
+  estimateDispersionsPriorVar,
+  estimateSizeFactorsForMatrix,
+  nbinomLRT,
+  vst
+)
+importFrom(GenomeInfoDb,
+  genome,
+  seqlevels
+)
 importFrom(GenomicFeatures,exonicParts)
-importFrom(GenomicRanges,GRanges)
-importFrom(GenomicRanges,findOverlaps)
-importFrom(GenomicRanges,start)
-importFrom(GenomicRanges,strand)
-importFrom(IRanges,end)
-importFrom(IRanges,findOverlaps)
-importFrom(IRanges,start)
+importFrom(GenomicRanges,
+  GRanges,
+  findOverlaps,
+  start,
+  strand
+)
+importFrom(IRanges,
+  end,
+  findOverlaps,
+  start
+)
 importFrom(MatrixGenerics,rowVars)
 importFrom(Rsubread,featureCounts)
-importFrom(S4Vectors,DataFrame)
-importFrom(S4Vectors,mcols)
-importFrom(S4Vectors,metadata)
-importFrom(S4Vectors,queryHits)
-importFrom(S4Vectors,subjectHits)
-importFrom(SummarizedExperiment,SummarizedExperiment)
-importFrom(SummarizedExperiment,assay)
-importFrom(SummarizedExperiment,assayNames)
+importFrom(S4Vectors,
+  DataFrame,
+  mcols,
+  metadata,
+  queryHits,
+  subjectHits
+)
+importFrom(SummarizedExperiment,
+  SummarizedExperiment,
+  assay,
+  assayNames
+)
 importFrom(dplyr,mutate)
-importFrom(ggplot2,geom_rect)
-importFrom(ggplot2,geom_segment)
-importFrom(ggplot2,geom_text)
-importFrom(ggplot2,ggplot)
+importFrom(ggplot2,
+  geom_rect,
+  geom_segment,
+  geom_text,
+  ggplot
+)
 importFrom(parallel,mclapply)
-importFrom(rtracklayer,import)
-importFrom(rtracklayer,import.gff)
+importFrom(rtracklayer,
+  import,
+  import.gff
+)
 importFrom(stats,as.formula)
