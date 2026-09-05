@@ -1,5 +1,6 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://yeehanxiao.github.io/Teddy/404.html</loc></url>
+<url><loc>https://yeehanxiao.github.io/Teddy/DEMO.html</loc></url>
 <url><loc>https://yeehanxiao.github.io/Teddy/LICENSE-text.html</loc></url>
 <url><loc>https://yeehanxiao.github.io/Teddy/articles/core-workflow.html</loc></url>
 <url><loc>https://yeehanxiao.github.io/Teddy/articles/downstream-analysis.html</loc></url>
@@ -9,6 +10,8 @@
 <url><loc>https://yeehanxiao.github.io/Teddy/reference/ChimericDrivenTest.html</loc></url>
 <url><loc>https://yeehanxiao.github.io/Teddy/reference/MotifSearch.html</loc></url>
 <url><loc>https://yeehanxiao.github.io/Teddy/reference/NCBI_check.html</loc></url>
+<url><loc>https://yeehanxiao.github.io/Teddy/reference/annotateChiTestResult.html</loc></url>
+<url><loc>https://yeehanxiao.github.io/Teddy/reference/annotateTEPosition.html</loc></url>
 <url><loc>https://yeehanxiao.github.io/Teddy/reference/buildIsoformSupport.html</loc></url>
 <url><loc>https://yeehanxiao.github.io/Teddy/reference/calculateFoldchange.html</loc></url>
 <url><loc>https://yeehanxiao.github.io/Teddy/reference/clean_sampleNames.html</loc></url>
@@ -18,6 +21,7 @@
 <url><loc>https://yeehanxiao.github.io/Teddy/reference/extractGTF.html</loc></url>
 <url><loc>https://yeehanxiao.github.io/Teddy/reference/extractTest.html</loc></url>
 <url><loc>https://yeehanxiao.github.io/Teddy/reference/formPlot.html</loc></url>
+<url><loc>https://yeehanxiao.github.io/Teddy/reference/formTEPositionPlot.html</loc></url>
 <url><loc>https://yeehanxiao.github.io/Teddy/reference/gffcompareAnno.html</loc></url>
 <url><loc>https://yeehanxiao.github.io/Teddy/reference/index.html</loc></url>
 <url><loc>https://yeehanxiao.github.io/Teddy/reference/pcmFunction.html</loc></url>

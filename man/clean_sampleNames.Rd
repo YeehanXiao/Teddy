@@ -6,14 +6,21 @@
 Remove replicate suffixes from sample names.}
 \usage{
 clean_sampleNames(names)
+
+clean_sampleNames(names)
 }
 \arguments{
 \item{names}{Character vector of sample names.}
 }
 \value{
 A character vector with replicate suffixes removed.
+
+A character vector with replicate suffixes removed.
 }
 \description{
+Clean sample names
+Remove replicate suffixes from sample names.
+
 Clean sample names
 Remove replicate suffixes from sample names.
 }

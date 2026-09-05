@@ -36,5 +36,4 @@ Suggests:
 SystemRequirements: cmake
 URL: https://github.com/YeehanXiao/Teddy, https://yeehanxiao.github.io/Teddy
 VignetteBuilder: knitr
-Config/roxygen2/version: 8.0.0
-RoxygenNote: 8.0.0
+Config/roxygen2/version: 8.1.0

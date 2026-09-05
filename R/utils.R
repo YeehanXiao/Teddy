@@ -72,6 +72,112 @@ extractGTF <- function(combineSE = NULL,
   return(GTF)
 }
 
+#' @title Annotate significant chimeric transcript test results
+#' @description Extract significant chimeric transcripts, compute fold change, match gene symbol and transcript annotation including exon rank.
+#' @param chi_test A DESeqDataSet object returned from ChimericDrivenTest().
+#' @param gtf A GRanges object returned from extractGTF().
+#' @param se A SummarizedExperiment object.
+#' @param cutoff Adjusted p-value cutoff to extract the significant results.
+#'
+#' @return A data.frame with extracted test results, fold change, gene symbol, and exon annotation.
+#' @importFrom dplyr filter distinct group_by summarise %>%
+#' @importFrom stringr str_replace str_extract
+#' @importFrom tibble rownames_to_column
+#' @export
+annotateChiTestResult <- function(chi_test, gtf, se, cutoff = 0.2) {
+  results <- extractTest(object = chi_test)
+  results <- na.omit(results)
+  
+  sig_result <- results[
+    results$padj < cutoff,
+    ,
+    drop = FALSE
+  ]
+  
+  sig_groupIDs <- unique(sig_result$groupID)
+  
+  foldchange_results <- calculateFoldchange(
+    object = chi_test,
+    genes = sig_groupIDs,
+    crossVar = "condition"
+  )
+  
+  foldchange_extract <- vapply(
+    foldchange_results,
+    function(x) x[[4]][2, 2],
+    numeric(1)
+  )
+  
+  foldchange_betweenCondition_extract <- vapply(
+    foldchange_results,
+    function(x) x[[2]][2],
+    numeric(1)
+  )
+  
+  fc_match <- match(
+    sig_result$groupID,
+    names(foldchange_results)
+  )
+  
+  sig_result$inter_foldchange <-
+    foldchange_extract[fc_match]
+  
+  sig_result$condition_foldchange <-
+    foldchange_betweenCondition_extract[fc_match]
+  
+  gtf_df <- as.data.frame(gtf)
+  
+  matched_genes <- gtf_df %>%
+    filter(gene_id %in% sig_groupIDs) %>%
+    distinct(gene_id, gene_name) %>%
+    group_by(gene_id) %>%
+    summarise(
+      gene_name = paste(
+        unique(gene_name),
+        collapse = ", "
+      )
+    )
+  
+  sig_result_expanded <- as.data.frame(sig_result) %>%
+    tibble::rownames_to_column(var = "rowname") %>%
+    dplyr::left_join(
+      matched_genes,
+      by = c("groupID" = "gene_id"),
+      relationship = "many-to-many"
+    )
+  
+  sig_result_expanded$rowname <- str_replace(
+    sig_result_expanded$rowname,
+    ":E(\\d+)",
+    function(m) {
+      paste0(
+        ":",
+        as.integer(str_extract(m, "\\d+"))
+      )
+    }
+  )
+  
+  sig_result_expanded$rowname <- sub(
+    ":(\\d+)\\..*",
+    ":\\1",
+    sig_result_expanded$rowname
+  )
+  
+  matching_indices <- match(
+    sig_result_expanded$rowname,
+    rownames(se)
+  )
+  
+  sig_result_annotated <- cbind(
+    sig_result_expanded,
+    rowData(se)[
+      matching_indices,
+      c("tx_id", "tx_name", "exon_rank")
+    ]
+  )
+  
+  return(sig_result_annotated)
+}
 
 #' Pick TE-chimeric transcript(s) for a gene
 #'
@@ -334,179 +440,119 @@ NCBI_check <- function(transposon, replace_name = FALSE, ncbi_style = TRUE) {
 }
 
 
-.Stringtiebin <- function(args = "") {
-  if (is.null(args) || args == "") {
-    stop("The StringTie executables require additional arguments.")
-  }
-  args <- gsub("^ *| *$", "", args)
-  args <- unlist(strsplit(args, split = " "))
-  bin <- file.path(system.file(package = "Teddy"), "stringtie")
-  output <- system2(command = bin, args = args)
+#' Clean sample names
+#' Remove replicate suffixes from sample names.
+#' @param names Character vector of sample names.
+#' @return A character vector with replicate suffixes removed.
+#' @export
+clean_sampleNames <- function(names) {
+  gsub("[-_\\.]?(rep|r)?[0-9]+$", "", names, ignore.case = TRUE)
 }
 
 
-.Stringtiebin3 <- function(args = "") {
-  if (is.null(args) || args == "") {
-    stop("The StringTie executables require additional arguments.")
-  }
-  args <- gsub("^ *| *$", "", args)
-  args <- unlist(strsplit(args, split = " "))
-  bin <- file.path(system.file(package = "Teddy"), "stringtie3", "stringtie")
-  output <- system2(command = bin, args = args)
-  return(output)
-}
-
-.gffcompareBin <- function(args = "") {
-  if (is.null(args) || args == "") {
-    stop("Gffcompare requires additional arguments.")
-  }
-  args <- gsub("^ *| *$", "", args)
-  args <- unlist(strsplit(args, split = " "))
-  bin <- file.path(system.file(package = "Teddy"), "gffcompare")
-  output <- system2(command = bin, args = args)
-}
-
-
-
-.parseDots <- function(...) {
-  if (...length() == 0) return("")
-  dots <- list(...)
-  args <- lapply(names(dots), FUN = function(x) {
-    paste(x, dots[x], sep = " ")
-  })
-  args <- paste0(unlist(args), collapse = " ")
-  return(args)
-}
-
-.ExtractTranscript <- function(gtf, transcriptGR) {
-  gtfs <- rtracklayer::import.gff(gtf)
+buildIsoformPresence <- function(trackingFiles,
+                                 conditions,
+                                 reference = NULL,
+                                 fpkm_mat = NULL,
+                                 threshold = 0.1,
+                                 cores = 8,
+                                 fill_missing_annot = FALSE) {
+  stopifnot(length(trackingFiles) == length(conditions))
+  stopifnot(all(file.exists(trackingFiles)))
   
-  transcript <- gtfs[gtfs$type == "transcript"]
-  exprts <- GenomicRanges::mcols(transcript)[, c("cov", "FPKM", "TPM")]
-  exprts <- apply(X = exprts, MARGIN = 2, as.numeric)
-  exprts <- as.data.frame(exprts, row.names = transcript$transcript_id)
-  
-  express <- matrix(0, nrow = length(transcriptGR), ncol = 3,
-                    dimnames = list(transcriptGR$transcript_id,
-                                    c("cov", "FPKM", "TPM")))
-  express <- as.data.frame(express)
-  
-  express[rownames(exprts), ] <- exprts
-  express <- express[transcriptGR$transcript_id, ]
-  
-  gtf <- basename(gtf)
-  sample <- gsub(pattern = ".gtf$", replacement = "", x = gtf)
-  coldata <- data.frame(row.names = sample, sample = sample)
-  
-  
-  cov <- express[, 'cov', drop = FALSE]
-  colnames(cov) <- sample
-  FPKM = express[, 'FPKM', drop = FALSE]
-  colnames(FPKM) <- sample
-  TPM = express[, "TPM", drop = FALSE]
-  colnames(TPM) <- sample
-  
-  SE <- SummarizedExperiment::SummarizedExperiment(
-    S4Vectors::SimpleList(cov = cov, FPKM = FPKM,
-                          TPM = TPM),
-                          rowRanges = transcriptGR,
-                          colData = coldata)
-  return(SE)
-}
-
-
-
-UnfoldCoefs <- function(varlist, fit, mm, mf){
-  coefLists <- lapply(seq(ncol(varlist)), function(index) {
-    termName <- colnames(varlist)[index]
-    varsInTerm <- stringr::str_split(termName, stringr::fixed(":"))[[1]]
-    stopifnot(all(varlist[varsInTerm, index] == 1))
-    stopifnot(sum(varlist[ , index]) == length(varsInTerm))
-    coefNames <- colnames(mm)[index+1]
-    varLevels <- lapply(varsInTerm, function(v) levels(factor(mf[[v]])))
-    coefIndices <- array(0, dim = sapply(varLevels, length), dimnames = varLevels)
-    lvlTbl <- stringr::str_match(coefNames, stringr::str_c( "^", stringr::str_c( varsInTerm, "([^:]*)", collapse=":" ), "$" ) )[ , -1, drop=FALSE]
-    coefIndices[lvlTbl] <- coefficients(fit)[coefNames]
-    coefIndices
-  })
-  names(coefLists) <- colnames(varlist)
-  a <- array(c(`(Intercept)` = "(Intercept)"))
-  coefLists <- c(list(a), coefLists)
-  names(coefLists)[1] <- "intercept"
-  coefLists[1] <- coefficients(fit)[1]
-  return(coefLists)
-}
-
-rmDepCols <- function(m) {
-  q <- qr(m)
-  if (q$rank < ncol(m)) 
-    m[, -q$pivot[(q$rank + 1):ncol(m)]]
-  else m
-}
-
-getEffectsForGene <- function(gene,
-                              groups,
-                              findex,
-                              frm,
-                              mf,
-                              disp,
-                              otherCounts,
-                              chimericCounts,
-                              N_samples,
-                              samples,
-                              features,
-                              object){
-  idx <- groups %in% gene & findex
-  sub_chimericCounts <- chimericCounts[idx, ,drop = FALSE]
-  sub_otherCounts <- otherCounts[idx, ,drop = FALSE]
-  sub_disp <- disp[idx]
-  names(sub_disp) <- features[idx]
-  N_exons <- sum(idx)
-  newMf <- as.data.frame(rep(samples, each = N_exons))
-  colnames(newMf) <- "sample"
-  chi_sizeFactors <- mf$sizeFactor[colData(object)$chimeric == "chimeric"]
-  chi_condition <- mf$condition[colData(object)$chimeric == "chimeric"]
-  newMf$count <- as.vector(t(sub_chimericCounts[, samples]))
-  newMf$dispersion <- rep(sub_disp, N_samples)
-  newMf$sizeFactors <- rep(chi_sizeFactors, each = N_exons)
-  newMf$Chimeric <- "chimeric"
-  newMf$condition <- rep(chi_condition, each = N_exons)
-  othersMf <- newMf
-  othersMf$Chimeric <- "others"
-  othersMf$count <- as.vector(t(sub_otherCounts[, samples]))
-  Mf <- rbind(othersMf, newMf)[,c("sample", "condition", "Chimeric", "sizeFactors", "dispersion", "count")]
-  Mf$Chimeric <- factor(Mf$Chimeric, levels = c("others", "chimeric"))
-  mm <- model.matrix(frm, Mf)
-  fit <- glmnb.fit(mm, Mf$count, dispersion = Mf$dispersion, offset = log(Mf$sizeFactors), tol=0.01)
-  varlist <- attr(terms(frm), "factors")
-  coef <- UnfoldCoefs(varlist = varlist, fit = fit, mm = mm, mf = Mf)
-  return(coef)
-}
-
-
-lookup_annot_tx <- function(tcons, ref_gtf) {
-  res <- suppressWarnings(
-    system2(
-      "grep",
-      args = c("-m", "1", tcons, ref_gtf),
-      stdout = TRUE,
-      stderr = FALSE
+  read_one <- function(f) {
+    trk <- readr::read_tsv(
+      f,
+      col_names = FALSE,
+      comment = "#",
+      show_col_types = FALSE
     )
+    
+    x3_clean <- ifelse(trk$X3 == "-" | is.na(trk$X3), NA, trk$X3)
+    
+    tibble::tibble(
+      TCONS = trk$X1,
+      annot_tx = x3_clean,
+      support = trk$X4 == "="
+    )
+  }
+  
+  lst <- lapply(trackingFiles, read_one)
+  
+  all_TCONS <- Reduce(union, lapply(lst, function(x) x$TCONS)) |> sort()
+  emp_anno <- rep(NA_character_, length(all_TCONS))
+  names(emp_anno) <- all_TCONS
+  
+  lst_full <- lapply(lst, function(df) {
+    dplyr::right_join(
+      df,
+      tibble::tibble(TCONS = all_TCONS),
+      by = "TCONS"
+    ) |>
+      dplyr::mutate(
+        support = ifelse(is.na(support), FALSE, support)
+      )
+  })
+  
+  invisible(lapply(lst_full, function(df) {
+    good <- !is.na(df$annot_tx) & df$annot_tx != "-"
+    fill_idx <- which(is.na(emp_anno) & good)
+    
+    if (length(fill_idx) > 0) {
+      emp_anno[fill_idx] <<- df$annot_tx[fill_idx]
+    }
+  }))
+  
+  support_tbl <- Reduce(
+    function(x, y) dplyr::full_join(x, y, by = "TCONS"),
+    lst_full
   )
   
-  if (length(res) == 0) {
-    return(NA_character_)
+  missing_idx <- which(is.na(emp_anno))
+  
+  if (fill_missing_annot && !is.null(reference) && length(missing_idx) > 0) {
+    filled <- parallel::mclapply(
+      support_tbl$TCONS[missing_idx],
+      function(x) {
+        tryCatch(
+          lookup_annot_tx(x, reference),
+          error = function(e) NA_character_
+        )
+      },
+      mc.cores = cores
+    ) |> unlist()
+    
+    emp_anno[missing_idx] <- filled
   }
   
-  gene_id <- sub('.*gene_id "([^"]+)".*', "\\1", res[1])
-  tx_id   <- sub('.*transcript_id "([^"]+)".*', "\\1", res[1])
+  support_tbl$emp_anno <- emp_anno[match(support_tbl$TCONS, names(emp_anno))]
   
-  if (gene_id == res[1] || tx_id == res[1]) {
-    return(NA_character_)
+  support_cols <- grep("^support", colnames(support_tbl))
+  colnames(support_tbl)[support_cols] <- conditions
+  
+  support_tbl$gene_id <- ifelse(
+    is.na(support_tbl$emp_anno),
+    NA_character_,
+    sub("\\|.*", "", support_tbl$emp_anno)
+  )
+  
+  support_tbl$tx_id <- ifelse(
+    is.na(support_tbl$emp_anno),
+    NA_character_,
+    sub(".*\\|", "", support_tbl$emp_anno)
+  )
+  
+  support_tbl <- support_tbl[, c("TCONS", "gene_id", "tx_id", conditions)]
+  
+  if (!is.null(fpkm_mat)) {
+    stopifnot(all(conditions %in% colnames(fpkm_mat)))
+    
+    fpkm_bool <- fpkm_mat[, conditions, drop = FALSE] > threshold
+    support_tbl[, conditions] <- support_tbl[, conditions] & fpkm_bool
   }
-  paste0(gene_id, "|", tx_id)
+  
+  support_tbl
 }
-
 
 #' Clean sample names
 #' Remove replicate suffixes from sample names.
@@ -622,9 +668,272 @@ buildIsoformPresence <- function(trackingFiles,
   support_tbl
 }
 
+.Stringtiebin <- function(args = "") {
+  if (is.null(args) || args == "") {
+    stop("The StringTie executables require additional arguments.")
+  }
+  args <- gsub("^ *| *$", "", args)
+  args <- unlist(strsplit(args, split = " "))
+  bin <- file.path(system.file(package = "Teddy"), "stringtie")
+  output <- system2(command = bin, args = args)
+}
 
-## Internal helper: rebuild GRanges in the current Bioconductor environment.
-## This avoids cross-version Seqinfo class issues in serialized GRanges objects.
+
+.Stringtiebin3 <- function(args = "") {
+  if (is.null(args) || args == "") {
+    stop("The StringTie executables require additional arguments.")
+  }
+  args <- gsub("^ *| *$", "", args)
+  args <- unlist(strsplit(args, split = " "))
+  bin <- file.path(system.file(package = "Teddy"), "stringtie3", "stringtie")
+  output <- system2(command = bin, args = args)
+  return(output)
+}
+
+.gffcompareBin <- function(args = "") {
+  if (is.null(args) || args == "") {
+    stop("Gffcompare requires additional arguments.")
+  }
+  args <- gsub("^ *| *$", "", args)
+  args <- unlist(strsplit(args, split = " "))
+  bin <- file.path(system.file(package = "Teddy"), "gffcompare")
+  output <- system2(command = bin, args = args)
+}
+
+
+
+.parseDots <- function(...) {
+  if (...length() == 0) return("")
+  dots <- list(...)
+  args <- lapply(names(dots), FUN = function(x) {
+    paste(x, dots[x], sep = " ")
+  })
+  args <- paste0(unlist(args), collapse = " ")
+  return(args)
+}
+
+.ExtractTranscript <- function(gtf, transcriptGR) {
+  gtfs <- rtracklayer::import.gff(gtf)
+  
+  transcript <- gtfs[gtfs$type == "transcript"]
+  exprts <- GenomicRanges::mcols(transcript)[, c("cov", "FPKM", "TPM")]
+  exprts <- apply(X = exprts, MARGIN = 2, as.numeric)
+  exprts <- as.data.frame(exprts, row.names = transcript$transcript_id)
+  
+  express <- matrix(0, nrow = length(transcriptGR), ncol = 3,
+                    dimnames = list(transcriptGR$transcript_id,
+                                    c("cov", "FPKM", "TPM")))
+  express <- as.data.frame(express)
+  
+  express[rownames(exprts), ] <- exprts
+  express <- express[transcriptGR$transcript_id, ]
+  
+  gtf <- basename(gtf)
+  sample <- gsub(pattern = ".gtf$", replacement = "", x = gtf)
+  coldata <- data.frame(row.names = sample, sample = sample)
+  
+  
+  cov <- express[, 'cov', drop = FALSE]
+  colnames(cov) <- sample
+  FPKM = express[, 'FPKM', drop = FALSE]
+  colnames(FPKM) <- sample
+  TPM = express[, "TPM", drop = FALSE]
+  colnames(TPM) <- sample
+  
+  SE <- SummarizedExperiment::SummarizedExperiment(
+    S4Vectors::SimpleList(cov = cov, FPKM = FPKM,
+                          TPM = TPM),
+                          rowRanges = transcriptGR,
+                          colData = coldata)
+  return(SE)
+}
+
+.reattachTE <- function(chi_GTF, te, minoverlap = 5L) {
+  te_names <- unique(
+    unlist(strsplit(chi_GTF$TE_name, ",", fixed = TRUE))
+  )
+  
+  target_te <- te[te$names %in% te_names]
+  
+  hits <- GenomicRanges::findOverlaps(
+    chi_GTF,
+    target_te,
+    minoverlap = minoverlap
+  )
+  
+  list(
+    exon = chi_GTF[S4Vectors::queryHits(hits)],
+    te = target_te[S4Vectors::subjectHits(hits)]
+  )
+}
+
+
+.classifyTECategory <- function(rank, n_exons) {
+  dplyr::case_when(
+    n_exons == 1L ~ "TE-initiated;TE-terminated",
+    rank == 1L ~ "TE-initiated",
+    rank == n_exons ~ "TE-terminated",
+    TRUE ~ "TE-exonized"
+  )
+}
+
+
+.locateTEInExon <- function(exon, te_hit, tolerance = 0L) {
+  ov_start <- pmax(IRanges::start(exon), IRanges::start(te_hit))
+  ov_end <- pmin(IRanges::end(exon), IRanges::end(te_hit))
+  s <- as.character(GenomicRanges::strand(exon))
+  
+  d5 <- ifelse(
+    s == "+",
+    ov_start - IRanges::start(exon),
+    IRanges::end(exon) - ov_end
+  )
+  
+  d3 <- ifelse(
+    s == "+",
+    IRanges::end(exon) - ov_end,
+    ov_start - IRanges::start(exon)
+  )
+  
+  dplyr::case_when(
+    d5 <= tolerance & d3 <= tolerance ~ "both",
+    d5 <= tolerance ~ "5prime",
+    d3 <= tolerance ~ "3prime",
+    TRUE ~ "internal"
+  )
+}
+
+
+.classifyTEBoundary <- function(position, rank, n_exons) {
+  role5 <- dplyr::case_when(
+    position %in% c("5prime", "both") & rank == 1L ~
+      "TE-associated-initiation",
+    position %in% c("5prime", "both") & rank > 1L ~
+      "TE-associated-splice-acceptor",
+    TRUE ~ ""
+  )
+  
+  role3 <- dplyr::case_when(
+    position %in% c("3prime", "both") & rank == n_exons ~
+      "TE-associated-termination",
+    position %in% c("3prime", "both") & rank < n_exons ~
+      "TE-associated-splice-donor",
+    TRUE ~ ""
+  )
+  
+  out <- paste0(
+    role5,
+    ifelse(nzchar(role5) & nzchar(role3), ";", ""),
+    role3
+  )
+  
+  ifelse(nzchar(out), out, "TE-internal")
+}
+
+
+UnfoldCoefs <- function(varlist, fit, mm, mf){
+  coefLists <- lapply(seq(ncol(varlist)), function(index) {
+    termName <- colnames(varlist)[index]
+    varsInTerm <- stringr::str_split(termName, stringr::fixed(":"))[[1]]
+    stopifnot(all(varlist[varsInTerm, index] == 1))
+    stopifnot(sum(varlist[ , index]) == length(varsInTerm))
+    coefNames <- colnames(mm)[index+1]
+    varLevels <- lapply(varsInTerm, function(v) levels(factor(mf[[v]])))
+    coefIndices <- array(0, dim = sapply(varLevels, length), dimnames = varLevels)
+    lvlTbl <- stringr::str_match(coefNames, stringr::str_c( "^", stringr::str_c( varsInTerm, "([^:]*)", collapse=":" ), "$" ) )[ , -1, drop=FALSE]
+    coefIndices[lvlTbl] <- coefficients(fit)[coefNames]
+    coefIndices
+  })
+  names(coefLists) <- colnames(varlist)
+  a <- array(c(`(Intercept)` = "(Intercept)"))
+  coefLists <- c(list(a), coefLists)
+  names(coefLists)[1] <- "intercept"
+  coefLists[1] <- coefficients(fit)[1]
+  return(coefLists)
+}
+
+
+rmDepCols <- function(m) {
+  q <- qr(m)
+  if (q$rank < ncol(m)) 
+    m[, -q$pivot[(q$rank + 1):ncol(m)]]
+  else m
+}
+
+getEffectsForGene <- function(gene,
+                              groups,
+                              findex,
+                              frm,
+                              mf,
+                              disp,
+                              otherCounts,
+                              chimericCounts,
+                              N_samples,
+                              samples,
+                              features,
+                              object){
+  idx <- groups %in% gene & findex
+  sub_chimericCounts <- chimericCounts[idx, ,drop = FALSE]
+  sub_otherCounts <- otherCounts[idx, ,drop = FALSE]
+  sub_disp <- disp[idx]
+  names(sub_disp) <- features[idx]
+  N_exons <- sum(idx)
+  newMf <- as.data.frame(rep(samples, each = N_exons))
+  colnames(newMf) <- "sample"
+  chi_sizeFactors <- mf$sizeFactor[colData(object)$chimeric == "chimeric"]
+  chi_condition <- mf$condition[colData(object)$chimeric == "chimeric"]
+  newMf$count <- as.vector(t(sub_chimericCounts[, samples]))
+  newMf$dispersion <- rep(sub_disp, N_samples)
+  newMf$sizeFactors <- rep(chi_sizeFactors, each = N_exons)
+  newMf$Chimeric <- "chimeric"
+  newMf$condition <- rep(chi_condition, each = N_exons)
+  othersMf <- newMf
+  othersMf$Chimeric <- "others"
+  othersMf$count <- as.vector(t(sub_otherCounts[, samples]))
+  Mf <- rbind(othersMf, newMf)[,c("sample", "condition", "Chimeric", "sizeFactors", "dispersion", "count")]
+  Mf$Chimeric <- factor(Mf$Chimeric, levels = c("others", "chimeric"))
+  mm <- model.matrix(frm, Mf)
+  fit <- glmnb.fit(mm, Mf$count, dispersion = Mf$dispersion, offset = log(Mf$sizeFactors), tol=0.01)
+  varlist <- attr(terms(frm), "factors")
+  coef <- UnfoldCoefs(varlist = varlist, fit = fit, mm = mm, mf = Mf)
+  return(coef)
+}
+
+
+lookup_annot_tx <- function(tcons, ref_gtf) {
+  res <- suppressWarnings(
+    system2(
+      "grep",
+      args = c("-m", "1", tcons, ref_gtf),
+      stdout = TRUE,
+      stderr = FALSE
+    )
+  )
+  
+  if (length(res) == 0) {
+    return(NA_character_)
+  }
+  
+  gene_id <- sub('.*gene_id "([^"]+)".*', "\\1", res[1])
+  tx_id   <- sub('.*transcript_id "([^"]+)".*', "\\1", res[1])
+  
+  if (gene_id == res[1] || tx_id == res[1]) {
+    return(NA_character_)
+  }
+  paste0(gene_id, "|", tx_id)
+}
+
+mapGeneName <- function(group_id, GTF) {
+  gtf_df <- as.data.frame(GTF)
+  map <- unique(gtf_df[, c("gene_id", "gene_name")])
+  map$gene_id_base <- sub("\\.[0-9]+$", "", map$gene_id)
+  group_id_base <- sub("\\.[0-9]+$", "", group_id)
+  out <- map$gene_name[match(group_id_base, map$gene_id_base)]
+  ifelse(is.na(out) | out == "", group_id, out)
+}
+
+
+
 .cleanGRanges <- function(gr) {
   if (!inherits(gr, "GRanges")) {
     stop("Input must be a GRanges object.")
@@ -665,11 +974,90 @@ buildIsoformPresence <- function(trackingFiles,
   
   combineSE
 }
-mapGeneName <- function(group_id, GTF) {
-  gtf_df <- as.data.frame(GTF)
-  map <- unique(gtf_df[, c("gene_id", "gene_name")])
-  map$gene_id_base <- sub("\\.[0-9]+$", "", map$gene_id)
-  group_id_base <- sub("\\.[0-9]+$", "", group_id)
-  out <- map$gene_name[match(group_id_base, map$gene_id_base)]
-  ifelse(is.na(out) | out == "", group_id, out)
+
+
+.reattachTE <- function(chi_GTF, te, minoverlap = 5L) {
+  te_names <- unique(
+    unlist(strsplit(chi_GTF$TE_name, ",", fixed = TRUE))
+  )
+  
+  target_te <- te[te$names %in% te_names]
+  
+  hits <- GenomicRanges::findOverlaps(
+    chi_GTF,
+    target_te,
+    minoverlap = minoverlap
+  )
+  
+  list(
+    exon = chi_GTF[S4Vectors::queryHits(hits)],
+    te = target_te[S4Vectors::subjectHits(hits)]
+  )
 }
+
+
+.classifyTECategory <- function(rank, n_exons) {
+  dplyr::case_when(
+    n_exons == 1L ~ "TE-initiated;TE-terminated",
+    rank == 1L ~ "TE-initiated",
+    rank == n_exons ~ "TE-terminated",
+    TRUE ~ "TE-exonized"
+  )
+}
+
+
+.locateTEInExon <- function(exon, te_hit, tolerance = 0L) {
+  ov_start <- pmax(IRanges::start(exon), IRanges::start(te_hit))
+  ov_end <- pmin(IRanges::end(exon), IRanges::end(te_hit))
+  s <- as.character(GenomicRanges::strand(exon))
+  
+  d5 <- ifelse(
+    s == "+",
+    ov_start - IRanges::start(exon),
+    IRanges::end(exon) - ov_end
+  )
+  
+  d3 <- ifelse(
+    s == "+",
+    IRanges::end(exon) - ov_end,
+    ov_start - IRanges::start(exon)
+  )
+  
+  dplyr::case_when(
+    d5 <= tolerance & d3 <= tolerance ~ "both",
+    d5 <= tolerance ~ "5prime",
+    d3 <= tolerance ~ "3prime",
+    TRUE ~ "internal"
+  )
+}
+
+
+.classifyTEBoundary <- function(position, rank, n_exons) {
+  role5 <- dplyr::case_when(
+    position %in% c("5prime", "both") & rank == 1L ~
+      "TE-associated-initiation",
+    position %in% c("5prime", "both") & rank > 1L ~
+      "TE-associated-splice-acceptor",
+    TRUE ~ ""
+  )
+  
+  role3 <- dplyr::case_when(
+    position %in% c("3prime", "both") & rank == n_exons ~
+      "TE-associated-termination",
+    position %in% c("3prime", "both") & rank < n_exons ~
+      "TE-associated-splice-donor",
+    TRUE ~ ""
+  )
+  
+  out <- paste0(
+    role5,
+    ifelse(nzchar(role5) & nzchar(role3), ";", ""),
+    role3
+  )
+  
+  ifelse(nzchar(out), out, "TE-internal")
+}
+
+
+
+

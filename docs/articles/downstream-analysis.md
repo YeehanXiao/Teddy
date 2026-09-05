@@ -21,6 +21,7 @@ te_file <- file.path(work_dir, "meta", "te_annotation.rds")
 se_file <- file.path(work_dir, "meta", "se.rds")
 anno_file <- file.path(work_dir, "meta", "anno.rds")
 chi_GTF_file <- file.path(work_dir, "meta", "chi_GTF.rds")
+TEposition_file <- file.path(work_dir, "meta", "TEposition.rds")
 ```
 
 ## 2. Differential TE-chimeric exon usage analysis
@@ -208,7 +209,48 @@ formPlot(
 `rank` indicates the transcript-order rank of the TE-overlapping exon
 and can be obtained from the `tx_exon_rank` column in `chi_GTF`.
 
-### 3.3 Visualize TE-associated bin-level expression with `diffBinPlot()`
+### 3.3 Visualize detailed TE positions with `formTEPositionPlot()`
+
+[`formTEPositionPlot()`](https://yeehanxiao.github.io/Teddy/reference/formTEPositionPlot.md)
+provides a higher-resolution view of TE-chimeric structures.
+
+``` r
+
+TEposition <- readRDS(TEposition_file)
+
+txid <- unique(TEposition$transcript_id)[1]
+
+formTEPositionPlot(
+  GTF = GTF,
+  TEposition = TEposition,
+  txid = txid
+)
+```
+
+![Example output of
+formTEPositionPlot](../reference/figures/formTEPositionPlot1.png)
+
+The plot colors can be customized:
+
+``` r
+
+txid <- unique(TEposition$transcript_id)[2]
+
+formTEPositionPlot(
+  GTF = GTF,
+  TEposition = TEposition,
+  txid = txid,
+  exonFill = "#D8D0E8",
+  TEfill = "#E6C86E",
+  borderColor = "#3B3650",
+  TEborderColor = "white"
+)
+```
+
+![Example output of formTEPositionPlot with customized
+colors](../reference/figures/formTEPositionPlot2.png)
+
+### 3.4 Visualize TE-associated bin-level expression with `diffBinPlot()`
 
 [`diffBinPlot()`](https://yeehanxiao.github.io/Teddy/reference/diffBinPlot.md)
 visualizes bin-level expression patterns for a selected candidate locus
@@ -265,7 +307,7 @@ diffBinPlot(
   [`ChimericDrivenTest()`](https://yeehanxiao.github.io/Teddy/reference/ChimericDrivenTest.md)
   as shown in Section 2.
 
-### 3.4 Visualize TE-chimeric isoform dynamics
+### 3.5 Visualize TE-chimeric isoform dynamics
 
 For illustration, we use `Nelfa` as an example candidate gene.
 

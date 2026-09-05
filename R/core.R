@@ -1025,3 +1025,136 @@ buildIsoformSupport <- function(reference,
   )
 }
 
+#' Annotate TE positions within transcript structures
+#'
+#' @param chi_GTF GRanges object returned by processGTF().
+#' @param te GRanges object containing TE annotations.
+#' @param gtf GRanges object or path to the complete transcript annotation.
+#' @param combineSE SummarizedExperiment containing the complete GTF in metadata.
+#' @param minoverlap Minimum overlap between exon and TE.
+#' @param boundary_tolerance Optional distance from an exon boundary used for
+#'   positional refinement. NULL preserves the original TEDDY classification only.
+#'
+#' @return A GRanges object containing exact TE-exon pairs and positional annotations.
+#'
+#' @export
+annotateTEPosition <- function(
+    chi_GTF,
+    te,
+    gtf = NULL,
+    combineSE = NULL,
+    minoverlap = 5L,
+    boundary_tolerance = NULL
+) {
+  
+  if (!inherits(chi_GTF, "GRanges") || !inherits(te, "GRanges")) {
+    stop("chi_GTF and te must be GRanges objects.")
+  }
+  
+  GTF <- if (!is.null(combineSE)) {
+    S4Vectors::metadata(combineSE)$gtf
+  } else if (inherits(gtf, "GRanges")) {
+    gtf
+  } else if (is.character(gtf) && length(gtf) == 1L) {
+    rtracklayer::import(gtf)
+  } else {
+    stop("Provide combineSE, a GRanges GTF, or a GTF path.")
+  }
+  
+  if (!"tx_exon_rank" %in% names(S4Vectors::mcols(chi_GTF))) {
+    stop("chi_GTF must contain tx_exon_rank.")
+  }
+  
+  tx_ids <- unique(as.character(chi_GTF$transcript_id))
+  
+  exon_GTF <- GTF[
+    as.character(GTF$type) == "exon" &
+      as.character(GTF$transcript_id) %in% tx_ids
+  ]
+  
+  n_exon_table <- table(as.character(exon_GTF$transcript_id))
+  
+  pair <- .reattachTE(
+    chi_GTF = chi_GTF,
+    te = te,
+    minoverlap = minoverlap
+  )
+  
+  exon <- pair$exon
+  te_hit <- pair$te
+  
+  if (!length(exon)) {
+    return(chi_GTF[0])
+  }
+  
+  rank <- as.integer(exon$tx_exon_rank)
+  
+  n_exons <- as.integer(
+    n_exon_table[as.character(exon$transcript_id)]
+  )
+  
+  if (anyNA(n_exons)) {
+    stop("Some transcripts were not found in the complete GTF.")
+  }
+  
+  overlap_start <- pmax(
+    IRanges::start(exon),
+    IRanges::start(te_hit)
+  )
+  
+  overlap_end <- pmin(
+    IRanges::end(exon),
+    IRanges::end(te_hit)
+  )
+  
+  overlap_bp <- overlap_end - overlap_start + 1L
+  
+  out <- exon
+  
+  out$TE_name <- as.character(te_hit$names)
+  out$TE_class <- as.character(te_hit$class)
+  out$TE_family <- as.character(te_hit$family)
+  
+  out$TE_start <- IRanges::start(te_hit)
+  out$TE_end <- IRanges::end(te_hit)
+  out$TE_strand <- as.character(GenomicRanges::strand(te_hit))
+  
+  out$overlap_bp <- overlap_bp
+  out$overlap_fraction_exon <-
+    overlap_bp / IRanges::width(exon)
+  out$overlap_fraction_TE <-
+    overlap_bp / IRanges::width(te_hit)
+  
+  out$TE_category <- .classifyTECategory(
+    rank,
+    n_exons
+  )
+  
+  if (is.null(boundary_tolerance)) {
+    
+    out$TE_position <- NA_character_
+    out$TE_boundary <- NA_character_
+    
+  } else {
+    
+    out$TE_position <- .locateTEInExon(
+      exon,
+      te_hit,
+      tolerance = boundary_tolerance
+    )
+    
+    out$TE_boundary <- .classifyTEBoundary(
+      out$TE_position,
+      rank,
+      n_exons
+    )
+  }
+  
+  out[
+    order(
+      as.character(out$transcript_id),
+      out$tx_exon_rank,
+      out$TE_start
+    )
+  ]
+}

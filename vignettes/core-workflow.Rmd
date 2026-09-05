@@ -551,7 +551,9 @@ colData: sample information
 
 ## 7. Extract TE-chimeric transcript features
 
-After transcript-level quantification, TEDDY provides `processGTF()` to extract TE-chimeric transcript features from the annotated unified GTF. This step identifies transcript exons whose genomic coordinates intersect TE annotations, and returns the corresponding transcript structures with TE name, family, and class information.
+After transcript-level quantification, TEDDY provides `processGTF()` to extract TE-chimeric transcript features from the annotated unified GTF. This step identifies transcript exons whose genomic coordinates intersect TE annotations, and returns the corresponding transcript structures with TE name, family, and class information. The resulting features can be further characterized with annotateTEPosition() to resolve the position of individual TE loci relative to exon and transcript boundaries.
+
+### 7.1 Extract TE-chimeric transcripts
 
 ```{r process-gtf, eval=FALSE}
 chi_GTF <- processGTF(
@@ -600,6 +602,44 @@ GRanges object with 69281 ranges and 17 metadata columns:
 - `minoverlap`: minimum overlap length between a transcript exon and TE annotation. A higher `minoverlap` threshold ensures more rigorous identification of TE-derived transcripts.
 - `threads`: number of threads used.
 
+### 7.2 Refine TE positional annotation within transcript structures
+
+```{r annotate-te-position, eval=FALSE}
+TEposition <- annotateTEPosition(
+  chi_GTF = chi_GTF,
+  te = te,
+  combineSE = combineSE,
+  minoverlap = 5,
+  boundary_tolerance = 5
+)
+
+saveRDS(
+  TEposition,
+  file = file.path(work_dir, "meta", "TEposition.rds")
+)
+```
+
+The resulting GRanges object contains the additional information describing the relative position of each TE within the exon, its association with transcript-defining boundaries, and the proportion of the exon sequence contributed by the TE.
+
+Example output:
+
+```text
+  gene_name    transcript_id tx_exon_rank TE_name overlap_bp overlap_fraction_exon overlap_fraction_TE   TE_category TE_position                     TE_boundary
+1 Gene_symbol1 tx_id1                   1 TE_1            50                 1.000               0.162  TE-initiated        both       TE-associated-initiation
+2 Gene_symbol2 tx_id2                   2 TE_2           125                 0.268               1.000   TE-exonized    internal                       TE-internal
+3 Gene_symbol3 tx_id3                   3 TE_3            96                 0.196               0.468   TE-exonized      3prime      TE-associated-splice-donor
+4 Gene_symbol4 tx_id4                   2 TE_4            94                 0.065               1.000   TE-exonized    internal                       TE-internal
+```
+
+**Notes**
+
+- `TE_category` provides the exon-rank-based classification. `TE-initiated` indicates that the TE overlaps the first exon, `TE-terminated` the terminal exon, and `TE-exonized` an internal exon.
+
+- `TE_position` describes where the TE-derived sequence lies within the exon. `5prime` and `3prime` indicate that the TE reaches or lies within the user-defined `boundary_tolerance` of the corresponding exon boundary, `both` indicates association with both boundaries, and `internal` indicates that the TE does not approach either boundary. A small tolerance can accommodate minor coordinate variation introduced, such as during transcript reconstruction or TE annotation.
+
+- `TE_boundary` combines `TE_category` and `TE_position` to to indicate potential boundary-associated roles. For example, a TE located near the 5′ boundary of the first exon is annotated as `TE-associated-initiation`, whereas a TE near the 3′ boundary of an internal exon is annotated as `TE-associated-splice-donor`. These are structural association with transcript boundaries rather than direct evidence of exact regulatory or splice-site motif.
+
+- TE positional annotations can be visualized with `formTEPositionPlot()`. See the [downstream analysis tutorial](downstream-analysis.html#visualize-detailed-te-positions-with-formtepositionplot) for examples.
 
 ## 8. Cross-platform integration
 

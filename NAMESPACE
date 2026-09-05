@@ -3,6 +3,8 @@
 export(ChimericDrivenTest)
 export(MotifSearch)
 export(NCBI_check)
+export(annotateChiTestResult)
+export(annotateTEPosition)
 export(buildIsoformSupport)
 export(calculateFoldchange)
 export(clean_sampleNames)
@@ -12,6 +14,7 @@ export(export_transcript)
 export(extractGTF)
 export(extractTest)
 export(formPlot)
+export(formTEPositionPlot)
 export(gffcompareAnno)
 export(pcmFunction)
 export(pick_canonical_tx)
@@ -81,12 +84,23 @@ importFrom(SummarizedExperiment,
   assay,
   assayNames
 )
-importFrom(dplyr,mutate)
+importFrom(dplyr,
+  "%>%",
+  distinct,
+  filter,
+  group_by,
+  mutate,
+  summarise
+)
 importFrom(ggplot2,
+  aes,
+  annotate,
+  coord_cartesian,
   geom_rect,
   geom_segment,
   geom_text,
-  ggplot
+  ggplot,
+  theme_void
 )
 importFrom(parallel,mclapply)
 importFrom(rtracklayer,
@@ -94,3 +108,8 @@ importFrom(rtracklayer,
   import.gff
 )
 importFrom(stats,as.formula)
+importFrom(stringr,
+  str_extract,
+  str_replace
+)
+importFrom(tibble,rownames_to_column)

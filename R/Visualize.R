@@ -389,3 +389,234 @@ plotIsoformDynamics <- function(combineSE,
   
   return(p)
 }
+
+
+#' @title Plot TE position within a transcript structure
+#'
+#' @param GTF A GRanges object containing the complete transcript annotation.
+#' @param TEposition A GRanges object returned by \code{\link{annotateTEPosition}}.
+#' @param txid Character. Transcript ID to plot.
+#' @param geneName Character. Gene name. If NULL, inferred from GTF.
+#' @param showTElabel Logical. Whether to show TE labels.
+#' @param clusterGap Numeric. Maximum plotting distance between adjacent TE
+#'   segments to group them into the same visual cluster.
+#' @param exonFill Character. Fill color for host-derived exon regions.
+#' @param TEfill Character. Fill color for TE-derived regions.
+#' @param borderColor Character. Color for exon borders, introns, and label lines.
+#' @param TEborderColor Character. Border color separating adjacent TE segments.
+#'
+#' @return A ggplot object.
+#'
+#' @importFrom ggplot2 ggplot aes geom_rect geom_segment geom_text annotate
+#'   coord_cartesian theme_void
+#' @export
+formTEPositionPlot <- function(
+    GTF,
+    TEposition,
+    txid,
+    geneName = NULL,
+    showTElabel = TRUE,
+    clusterGap = 0.015,
+    exonFill = "#ECD1D6",
+    TEfill = "#3A3B4F",
+    borderColor = "black",
+    TEborderColor = "white"
+) {
+  tx <- GTF[GTF$transcript_id == txid]
+  
+  if ("type" %in% names(S4Vectors::mcols(tx))) {
+    tx <- tx[tx$type == "exon"]
+  }
+  
+  if (!length(tx)) {
+    stop("The provided transcript ID was not found in the GTF.")
+  }
+  
+  txStrand <- unique(as.character(GenomicRanges::strand(tx)))
+  
+  if (length(txStrand) != 1L || txStrand == "*") {
+    stop("Transcript strand could not be uniquely determined.")
+  }
+  
+  ord <- if (txStrand == "+") {
+    order(IRanges::start(tx))
+  } else {
+    order(IRanges::start(tx), decreasing = TRUE)
+  }
+  tx <- tx[ord]
+  
+  exonWidth <- 0.72
+  exonX <- seq_along(tx)
+  
+  exonDf <- data.frame(
+    exonId = exonX,
+    seqnames = as.character(GenomicRanges::seqnames(tx)),
+    start = IRanges::start(tx),
+    end = IRanges::end(tx),
+    strand = as.character(GenomicRanges::strand(tx)),
+    x = exonX,
+    xmin = exonX - exonWidth / 2,
+    xmax = exonX + exonWidth / 2
+  )
+  
+  exonDf$key <- paste(
+    exonDf$seqnames, exonDf$start, exonDf$end, exonDf$strand,
+    sep = ":"
+  )
+  
+  if (is.null(geneName)) {
+    geneName <- if ("gene_name" %in% names(S4Vectors::mcols(tx))) {
+      unique(as.character(tx$gene_name))[1]
+    } else {
+      "Gene"
+    }
+  }
+  
+  p <- ggplot2::ggplot() +
+    ggplot2::geom_rect(
+      data = exonDf,
+      ggplot2::aes(xmin = xmin, xmax = xmax, ymin = 0.45, ymax = 0.55),
+      fill = exonFill,
+      color = borderColor,
+      linewidth = 0.45
+    )
+  
+  if (nrow(exonDf) > 1L) {
+    intronDf <- data.frame(
+      x = exonDf$xmax[-nrow(exonDf)],
+      xend = exonDf$xmin[-1]
+    ) |>
+      dplyr::mutate(mid = (x + xend) / 2)
+    
+    p <- p +
+      ggplot2::geom_segment(
+        data = intronDf,
+        ggplot2::aes(x = x, xend = mid, y = 0.5, yend = 0.60),
+        color = borderColor,
+        linewidth = 0.45
+      ) +
+      ggplot2::geom_segment(
+        data = intronDf,
+        ggplot2::aes(x = mid, xend = xend, y = 0.60, yend = 0.5),
+        color = borderColor,
+        linewidth = 0.45
+      )
+  }
+  
+  teDf <- as.data.frame(
+    TEposition[TEposition$transcript_id == txid]
+  )
+  
+  if (nrow(teDf)) {
+    teDf <- teDf |>
+      dplyr::distinct(
+        seqnames, start, end, strand,
+        TE_start, TE_end, TE_name,
+        .keep_all = TRUE
+      )
+    
+    teDf$key <- paste(
+      teDf$seqnames, teDf$start, teDf$end, teDf$strand,
+      sep = ":"
+    )
+    
+    teDf$exonId <- match(teDf$key, exonDf$key)
+    teDf <- teDf[!is.na(teDf$exonId), , drop = FALSE]
+  }
+  
+  if (nrow(teDf)) {
+    teDf$ovStart <- pmax(teDf$start, teDf$TE_start)
+    teDf$ovEnd <- pmin(teDf$end, teDf$TE_end)
+    exonLen <- teDf$end - teDf$start + 1L
+    
+    fracStart <- if (txStrand == "+") {
+      (teDf$ovStart - teDf$start) / exonLen
+    } else {
+      (teDf$end - teDf$ovEnd) / exonLen
+    }
+    
+    fracEnd <- if (txStrand == "+") {
+      (teDf$ovEnd - teDf$start + 1L) / exonLen
+    } else {
+      (teDf$end - teDf$ovStart + 1L) / exonLen
+    }
+    
+    teDf$xmin <- exonDf$xmin[teDf$exonId] + fracStart * exonWidth
+    teDf$xmax <- exonDf$xmin[teDf$exonId] + fracEnd * exonWidth
+    
+    p <- p +
+      ggplot2::geom_rect(
+        data = teDf,
+        ggplot2::aes(xmin = xmin, xmax = xmax, ymin = 0.45, ymax = 0.55),
+        fill = TEfill,
+        color = TEborderColor,
+        linewidth = 0.45
+      )
+    
+    if (showTElabel) {
+      labelDf <- teDf |>
+        dplyr::group_by(exonId) |>
+        dplyr::arrange(xmin, xmax, .by_group = TRUE) |>
+        dplyr::mutate(
+          previousEnd = dplyr::lag(cummax(xmax), default = -Inf),
+          cluster = cumsum(xmin > previousEnd + clusterGap)
+        ) |>
+        dplyr::group_by(exonId, cluster) |>
+        dplyr::summarise(
+          clusterXmin = min(xmin),
+          clusterXmax = max(xmax),
+          TElabel = paste(unique(TE_name), collapse = ", "),
+          .groups = "drop"
+        ) |>
+        dplyr::mutate(TEmid = (clusterXmin + clusterXmax) / 2) |>
+        dplyr::group_by(exonId) |>
+        dplyr::arrange(TEmid, .by_group = TRUE) |>
+        dplyr::mutate(
+          labelId = dplyr::row_number(),
+          labelTop = labelId %% 2L == 1L,
+          labelY = ifelse(labelTop, 0.76, 0.24),
+          elbowY = ifelse(labelTop, 0.68, 0.32),
+          anchorY = ifelse(labelTop, 0.55, 0.45)
+        ) |>
+        dplyr::ungroup()
+      
+      p <- p +
+        ggplot2::geom_segment(
+          data = labelDf,
+          ggplot2::aes(
+            x = TEmid, xend = TEmid,
+            y = anchorY, yend = elbowY
+          ),
+          color = borderColor,
+          linewidth = 0.3
+        ) +
+        ggplot2::geom_text(
+          data = labelDf,
+          ggplot2::aes(x = TEmid, y = labelY, label = TElabel),
+          size = 3
+        )
+    }
+  }
+  
+  p +
+    ggplot2::geom_text(
+      data = exonDf,
+      ggplot2::aes(x = x, y = 0.62, label = paste0("E", exonId)),
+      fontface = "bold",
+      size = 3.4
+    ) +
+    ggplot2::annotate(
+      "text",
+      x = 0.55,
+      y = 0.92,
+      label = paste(geneName, txid, sep = ":"),
+      hjust = 0,
+      size = 4
+    ) +
+    ggplot2::coord_cartesian(
+      xlim = c(0.35, length(tx) + 0.65),
+      ylim = c(0.12, 0.98),
+      clip = "off"
+    ) +
+    ggplot2::theme_void()
+}

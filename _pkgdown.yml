@@ -1,54 +1,50 @@
 url: https://yeehanxiao.github.io/Teddy
-
 template:
   bootstrap: 5
   bslib:
-    primary: "#7C3AED"
-
+    primary: '#7C3AED'
 development:
   mode: auto
-
 home:
   title: TEDDY
   description: TE-dependent / TE-chimeric transcript analysis framework
-
 reference:
-  - title: Transcriptome reconstruction and quantification
-    contents:
-      - stringtieAssembly
-      - stringtieMerge
-      - gffcompareAnno
-      - stringtieCombine
-      - buildIsoformSupport
-
-  - title: TE-chimeric feature annotation
-    contents:
-      - prepareAnno
-      - countAnno
-      - processGTF
-
-  - title: Differential TE-chimeric exon usage
-    contents:
-      - ChimericDrivenTest
-      - extractTest
-      - calculateFoldchange
-      - pick_canonical_tx
-      - pick_chimeric_tx
-
-  - title: Visualization
-    contents:
-      - formPlot
-      - diffBinPlot
-      - plotIsoformDynamics
-
-  - title: Sequence and motif analysis
-    contents:
-      - export_transcript
-      - MotifSearch
-      - pcmFunction
-
-  - title: Utilities
-    contents:
-      - extractGTF
-      - clean_sampleNames
-      - NCBI_check
+- title: Transcriptome reconstruction and quantification
+  contents:
+  - stringtieAssembly
+  - stringtieMerge
+  - gffcompareAnno
+  - stringtieCombine
+  - buildIsoformSupport
+- title: TE-chimeric feature annotation
+  contents:
+  - prepareAnno
+  - countAnno
+  - processGTF
+- title: Differential TE-chimeric exon usage
+  contents:
+  - ChimericDrivenTest
+  - extractTest
+  - calculateFoldchange
+  - pick_canonical_tx
+  - pick_chimeric_tx
+- title: Visualization
+  contents:
+  - formPlot
+  - diffBinPlot
+  - plotIsoformDynamics
+- title: Sequence and motif analysis
+  contents:
+  - export_transcript
+  - MotifSearch
+  - pcmFunction
+- title: Utilities
+  contents:
+  - extractGTF
+  - clean_sampleNames
+  - NCBI_check
+- title: TE-chimeric annotation and visualization
+  contents:
+  - annotateChiTestResult
+  - annotateTEPosition
+  - formTEPositionPlot

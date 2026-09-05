@@ -62,3 +62,12 @@
   : Clean sample names Remove replicate suffixes from sample names.
 - [`NCBI_check()`](https://yeehanxiao.github.io/Teddy/reference/NCBI_check.md)
   : Standardize transposon annotations for TEDDY
+
+## TE-chimeric annotation and visualization
+
+- [`annotateChiTestResult()`](https://yeehanxiao.github.io/Teddy/reference/annotateChiTestResult.md)
+  : Annotate significant chimeric transcript test results
+- [`annotateTEPosition()`](https://yeehanxiao.github.io/Teddy/reference/annotateTEPosition.md)
+  : Annotate TE positions within transcript structures
+- [`formTEPositionPlot()`](https://yeehanxiao.github.io/Teddy/reference/formTEPositionPlot.md)
+  : Plot TE position within a transcript structure
