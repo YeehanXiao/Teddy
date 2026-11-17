@@ -1,7 +1,7 @@
 Package: Teddy
 Type: Package
 Title: Analysis of TE-Dependent Gene Isoforms
-Version: 1.2.9
+Version: 1.2.8
 Author: Yihan Xiao
 Maintainer: Yihan Xiao <1653008@tongji.edu.cn>
 Description: Teddy provides functions for identifying, quantifying,
@@ -10,7 +10,6 @@ Description: Teddy provides functions for identifying, quantifying,
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 4.1.0)
 Imports:
     rtracklayer,
     GenomeInfoDb,
@@ -27,18 +26,13 @@ Imports:
     BiocParallel,
     MatrixGenerics,
     Biostrings,
-    dplyr (>= 1.1.1),
+    dplyr,
     ggplot2,
-    readr,
-    stringr,
-    tibble,
-    tidyr,
     methods,
     stats
 Suggests:
     knitr,
-    rmarkdown,
-    txdbmaker
+    rmarkdown
 SystemRequirements: cmake
 URL: https://github.com/YeehanXiao/Teddy, https://yeehanxiao.github.io/Teddy
 VignetteBuilder: knitr
