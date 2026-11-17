@@ -225,3 +225,9 @@ For step-by-step workflows, see the detailed tutorials:
 
 - [TEDDY core workflow](https://yeehanxiao.github.io/Teddy/articles/core-workflow.html)
 - [TEDDY downstream analysis](https://yeehanxiao.github.io/Teddy/articles/downstream-analysis.html)
+
+## Citation
+
+If you use TEDDY in your research, please cite our preprint:
+
+Xiao, Y., Shen, L., Jiang, C., Zhang, Y., Liang, Y., Yin, J., Wang, H., Shi, J., Le, R., and Gao, S. (2026). **TEDDY: An integrative workflow for TE-chimeric isoform reconstruction and systematic characterization of TE-dependent transcriptional regulation.** *bioRxiv* (preprint). [doi:10.64898/2026.08.22.746432](https://doi.org/10.64898/2026.08.22.746432).
