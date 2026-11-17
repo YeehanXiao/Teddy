@@ -228,4 +228,4 @@ For step-by-step workflows, see the detailed tutorials:
 
 ## Citation
 
-We welcome researchers to use TEDDY for transposable element analysis. Please cite our [bioRxiv preprint](https://doi.org/10.64898/2026.08.22.746432).
+We welcome researchers to use TEDDY for integrated, end-to-end analysis of TE-dependent isoforms. Please cite our [bioRxiv preprint](https://doi.org/10.64898/2026.08.22.746432).
