@@ -228,6 +228,4 @@ For step-by-step workflows, see the detailed tutorials:
 
 ## Citation
 
-If you use TEDDY in your research, please cite our preprint:
-
-Xiao, Y., Shen, L., Jiang, C., Zhang, Y., Liang, Y., Yin, J., Wang, H., Shi, J., Le, R., and Gao, S. (2026). **TEDDY: An integrative workflow for TE-chimeric isoform reconstruction and systematic characterization of TE-dependent transcriptional regulation.** *bioRxiv* (preprint). [doi:10.64898/2026.08.22.746432](https://doi.org/10.64898/2026.08.22.746432).
+We welcome researchers to use TEDDY for transposable element analysis. Please cite our [bioRxiv preprint](https://doi.org/10.64898/2026.08.22.746432).
